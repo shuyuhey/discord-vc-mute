@@ -30,6 +30,9 @@ const renderer = {
     filename: 'renderer.[contenthash].js',
     path: outputPath,
   },
+  resolve: {
+    extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
+  },
   module: {
     rules: [
       {
@@ -44,7 +47,7 @@ const renderer = {
       filename: 'index.html',
       template: './renderer/index.html'
     }),
-  ]
+  ],
 }
 
 module.exports = [main, renderer];
