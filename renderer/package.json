@@ -1,8 +1,6 @@
 {
   "scripts": {
-    "start": "electron dist/main.js",
-    "dev": "webpack --watch",
-    "build": "webpack"
+    "dev": "webpack --watch"
   },
   "dependencies": {
     "react": "^17.0.1",

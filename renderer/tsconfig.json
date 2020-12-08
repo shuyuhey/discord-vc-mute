@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "commonjs",
+    "module": "esnext",
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -10,13 +10,21 @@
       "dom",
       "dom.iterable",
       "esnext"
+    ],
+    "sourceMap": true,
+    "typeRoots": [
+      "node_modules/@types",
+      "types",
+      "../app/types"
     ]
   },
   "exclude": [
-    "node_modules"
+    "./node_modules"
   ],
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "**/*.d.ts",
+    "../app/types/*.d.ts"
   ]
 }
