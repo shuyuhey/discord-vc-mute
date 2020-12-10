@@ -28,16 +28,16 @@ export function useSettingViewModel() {
     return invoke('REQUEST_FETCH_GUILD');
   }, []);
 
-  const selectGuild = React.useCallback((id: string) => {
-    return invoke('SELECT_GUILD', { guildId: id });
+  const selectGuild = React.useCallback((guildId: string) => {
+    return invoke('REQUEST_FETCH_CHANNELS', { guildId });
   }, []);
 
-  const selectChannel = React.useCallback((meetingId, diedId) => {
-    return invoke('SELECT_CHANNEL', { meetingId, diedId });
+  const selectChannel = React.useCallback((guildId: string, channelId: string) => {
+    return invoke('REQUEST_FETCH_MEMBERS', { guildId, channelId });
   }, []);
 
-  const completeStandby = React.useCallback(() => {
-    return invoke('COMPLETE_STANDBY', { memberIds: members?.map(member => member.id) ?? [] });
+  const completeStandby = React.useCallback((guildId: string, channelId: string) => {
+    return invoke('COMPLETE_STANDBY', { guildId, channelId });
   }, [members]);
 
   return {

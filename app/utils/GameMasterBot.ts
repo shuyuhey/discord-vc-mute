@@ -4,7 +4,6 @@ import { DiscordRepository } from "./DiscordRepository";
 export class GameMasterBot {
   private guildId: Snowflake;
   private meetingChannelId: Snowflake;
-  private diedChannelId: Snowflake;
   private members: MemberWithGameInfo[];
   private isStarted: boolean;
   private inMeeting: boolean;
@@ -14,13 +13,11 @@ export class GameMasterBot {
   constructor(
     guildId: Snowflake,
     meetingChannelId: Snowflake,
-    diedChannelId: Snowflake,
     members: Member[],
     repository: DiscordRepository
   ) {
     this.guildId = guildId;
     this.meetingChannelId = meetingChannelId;
-    this.diedChannelId = diedChannelId;
     this.members = members.map(member => {
       return {
         id: member.id,

@@ -2,16 +2,6 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { DiscordRepository } from "./utils/DiscordRepository";
 import { GameMasterBot } from "./utils/GameMasterBot";
 
-const gameInfo: {
-  guildId: string | null,
-  meetingChannelId: string | null,
-  diedChannelId: string | null
-} = {
-  guildId: null,
-  meetingChannelId: null,
-  diedChannelId: null
-}
-
 let bot: GameMasterBot | null = null;
 
 function createWindow() {
@@ -27,9 +17,7 @@ function createWindow() {
   win.loadFile('./index.html');
 }
 
-app.whenReady().then(() => {
-  createWindow();
-})
+app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -53,39 +41,35 @@ ipcMain.handle('REQUEST_FETCH_GUILD', (e, arg) => {
   return;
 })
 
-ipcMain.handle('SELECT_GUILD', (e, arg: { guildId: string }) => {
+ipcMain.handle('REQUEST_FETCH_CHANNELS', (e, arg: { guildId: string }) => {
   DiscordRepository.shared().then((repository) => {
     return repository.fetchVoiceChannels(arg.guildId);
   }).then((channels) => {
-    gameInfo.guildId = arg.guildId
     e.sender.send('COMPLETE_FETCH_CHANNELS', channels);
   });
 
   return;
 })
 
-ipcMain.handle('SELECT_CHANNEL', (e, arg: { meetingId: string, diedId: string }) => {
+ipcMain.handle('REQUEST_FETCH_MEMBERS', (e, arg: { guildId: string, channelId: string }) => {
   DiscordRepository.shared().then((repository) => {
-    return repository.fetchGuildMembers(gameInfo.guildId ?? '', arg.meetingId);
+    return repository.fetchChannelMembers(arg.guildId, arg.channelId);
   }).then((members) => {
-    gameInfo.meetingChannelId = arg.meetingId;
-    gameInfo.diedChannelId = arg.diedId;
     e.sender.send('COMPLETE_FETCH_MEMBERS', members);
   });
 
   return;
 })
 
-ipcMain.handle('COMPLETE_STANDBY', (e, arg) => {
+ipcMain.handle('COMPLETE_STANDBY', (e, arg: { guildId: string, channelId: string }) => {
   DiscordRepository.shared().then((repository) => {
     return Promise.all([
       Promise.resolve(repository),
-      repository.fetchGuildMembers(gameInfo.guildId ?? '', gameInfo.meetingChannelId ?? '')
+      repository.fetchChannelMembers(arg.guildId, arg.channelId)
     ]);
   }).then(([repository, members]) => {
-    bot = new GameMasterBot(gameInfo.guildId ?? '',
-      gameInfo.meetingChannelId ?? '',
-      gameInfo.diedChannelId ?? '',
+    bot = new GameMasterBot(arg.guildId,
+      arg.channelId,
       members,
       repository);
     e.sender.send('START_GAME')
