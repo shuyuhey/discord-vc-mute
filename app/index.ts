@@ -6,15 +6,16 @@ let bot: GameMasterBot | null = null;
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 800,
-    height: 400,
+    width: 320,
+    height: 600,
     webPreferences: {
       nodeIntegration: true,
       devTools: true
     }
   })
 
-  win.loadFile('./index.html');
+  // win.loadFile('./index.html');
+  win.loadURL('http://0.0.0.0:3035/');
 }
 
 app.whenReady().then(createWindow);

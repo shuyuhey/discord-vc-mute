@@ -29,7 +29,20 @@ const renderer = {
       template: './index.html'
     }),
   ],
-  devtool: 'inline-source-map'
+  devtool: 'inline-source-map',
+  devServer: {
+    host: '0.0.0.0',
+    disableHostCheck: true,
+    port: 3035,
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
+    watchOptions: {
+      ignored: /node_modules/,
+      aggregateTimeout: 300,
+      poll: 1000
+    }
+  },
 }
 
 module.exports = [renderer];

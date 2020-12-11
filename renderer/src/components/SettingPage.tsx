@@ -13,7 +13,6 @@ export const SettingPage = () => {
 
   return (
     <>
-
       <Formik<{
         guildId: string;
         channelId: string;
@@ -30,7 +29,7 @@ export const SettingPage = () => {
           <Form>
             <Field name={'guildId'}>
               {({ field }: FieldProps) => (
-                <>
+                <div>
                   <select
                     {...field}
                     onChange={(e) => {
@@ -43,13 +42,13 @@ export const SettingPage = () => {
                       <option value={guild.id}>{guild.name}</option>
                     ))}
                   </select>
-                </>
+                </div>
               )}
             </Field>
 
             <Field name={'channelId'}>
               {({ field }: FieldProps) => (
-                <>
+                <div>
                   <select
                     {...field}
                     onChange={(e) => {
@@ -62,7 +61,7 @@ export const SettingPage = () => {
                       <option value={channel.id}>{channel.name}</option>
                     ))}
                   </select>
-                </>
+                </div>
               )}
             </Field>
 
@@ -72,7 +71,9 @@ export const SettingPage = () => {
               ))}
             </div>
 
-            <button type={'submit'}>設定完了</button>
+            <button type={'submit'}
+                    disabled={!viewModel.members || viewModel.members?.length == 0}
+            >設定完了</button>
           </Form>
         )}
       </Formik>
