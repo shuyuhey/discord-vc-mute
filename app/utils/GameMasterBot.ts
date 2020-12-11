@@ -40,10 +40,13 @@ export class GameMasterBot {
   }
 
   setDied(memberId: string, isDied: boolean) {
-    this.members = this.members.map(member => ({
-      ...member,
-      isDied: member.id == memberId ? isDied : member.isDied
-    }));
+    this.repository.setMuteMembers(this.guildId,[memberId], true)
+      .then(() => {
+        this.members = this.members.map(member => ({
+          ...member,
+          isDied: member.id == memberId ? isDied : member.isDied
+        }));
+      });
   }
 
   makePlayMode() {

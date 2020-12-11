@@ -30,6 +30,10 @@ export function useGameViewModel() {
     };
   }, [gameInfo?.isStarted]);
 
+  const backToSetting = React.useCallback(() => {
+    return invoke('RESET_SETTING');
+  }, []);
+
   const fetchGame = React.useCallback(() => {
     return invoke('REQUEST_FETCH_GAME');
   }, []);
@@ -56,6 +60,7 @@ export function useGameViewModel() {
 
   return {
     gameInfo,
+    backToSetting,
     fetchGame,
     startPlay,
     startMeeting,

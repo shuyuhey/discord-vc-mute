@@ -16,6 +16,10 @@ function createWindow() {
 
   // win.loadFile('./index.html');
   win.loadURL('http://0.0.0.0:3035/');
+
+  win.on('ready-to-show', () => {
+    win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
+  });
 }
 
 app.whenReady().then(createWindow);
@@ -30,7 +34,13 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
   }
-})
+});
+
+ipcMain.handle('RESET_SETTING', (e) => {
+  bot = null;
+  e.sender.send('UPDATE_MODE', 'SETTING');
+  return;
+});
 
 ipcMain.handle('REQUEST_FETCH_GUILD', (e, arg) => {
   DiscordRepository.shared().then((repository) => {

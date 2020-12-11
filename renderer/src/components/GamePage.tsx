@@ -243,7 +243,7 @@ export const GamePage: React.FC<{}> = () => {
       ) : (
         <Container>
           <Header>
-            <BackButtonWithIcon>設定に戻る</BackButtonWithIcon>
+            <BackButtonWithIcon onClick={viewModel.backToSetting}>設定に戻る</BackButtonWithIcon>
           </Header>
           <MemberContainer>
             <ContentLabel>参加メンバー</ContentLabel>

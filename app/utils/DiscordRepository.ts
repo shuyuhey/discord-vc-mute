@@ -65,7 +65,12 @@ export class DiscordRepository {
 
   async setDeafMembers(guildId: string, memberIds: string[], deaf: boolean) {
     const members = await this.findGuildMembers(guildId, memberIds);
-    return await Promise.all(members.map(member => member.voice.setDeaf(deaf)));
+    return await Promise.all(members.map(member => {
+      return Promise.all([
+        member.voice.setDeaf(deaf),
+        member.voice.setMute(deaf)
+      ])
+    }));
   }
 
   async setMuteMembers(guildId: string, memberIds: string[], mute: boolean) {
