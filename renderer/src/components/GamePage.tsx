@@ -18,15 +18,22 @@ const PrimaryButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F2F2F2;
-  border: 2px solid #F2F2F2;
+  background: var(--green);
+  border: 2px solid var(--green);
   border-radius: 4px;
 
   font-weight: bold;  
   font-size: 20px;
   line-height: 23px;
 
-  color: #000000;
+  color: var(--gray-0);
+  
+  cursor: pointer;
+  
+  &:disabled {
+    color: #C4C4C4; 
+    cursor: not-allowed;
+  }
 `;
 
 const SecondaryButton = styled.button`
@@ -40,17 +47,26 @@ const SecondaryButton = styled.button`
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  border: 2px solid #000000;
+  border: 2px solid var(--gray-9);
   background: transparent;
   
   font-weight: bold;
   font-size: 20px;
   line-height: 23px;
 
-  color: #000000;
+  color: var(--gray-9);
+  
+  cursor: pointer;
+  
+  &:disabled {
+    color: #C4C4C4;
+    border-color: #C4C4C4;
+    cursor: not-allowed;
+  }
 `;
 
 const MemberContainer = styled.div`
+  padding: 16px;
   display: flex;
   flex-direction: column;
   
@@ -69,6 +85,17 @@ const MemberInfoContainer = styled.div`
   display: flex;
   align-items: center;
   
+  font-size: 16px;
+  line-height: 19px;
+  color: var(--blue);
+  
+  > img {
+    width: 32px;
+    height: auto;
+    line-height: 1;
+    border-radius: 16px;
+  }
+  
   > * + * {
     margin-left: 8px;
   }
@@ -77,7 +104,7 @@ const MemberInfoContainer = styled.div`
 const MemberInfo: React.FC<{ name: string; icon: string; }> = (props) => (
   <MemberInfoContainer>
     <img src={props.icon} alt={`${props.name}のアイコン`} />
-    <span>{props.name}</span>
+    <span>@{props.name}</span>
   </MemberInfoContainer>
 );
 
@@ -85,6 +112,7 @@ const MemberInfo: React.FC<{ name: string; icon: string; }> = (props) => (
 const MemberOnGame = styled.button<{ isDied: boolean }>`
   appearance: none;
   outline: none;
+  border: none;
   
   padding: 16px 24px;
   background: #F2F2F2;
@@ -93,7 +121,9 @@ const MemberOnGame = styled.button<{ isDied: boolean }>`
   display: flex;
   align-items: center;
   
-  color: ${props => props.isDied ? 'red' : '#000000'};
+  cursor: pointer;
+  
+  ${props => props.isDied ? 'filter: grayscale(100%);' : ''};
 `;
 
 const ButtonContainer = styled.div`
@@ -106,30 +136,52 @@ const BackButton = styled.button`
   outline: none;
   border: none;
   box-sizing: border-box;
+  cursor: pointer;
 
+  padding: 4px;
   display: flex;
   align-items: center;
   border-radius: 4px;
   background: transparent;
   
-  color: #000000;
+  color: var(--gray-9);
   
-  font-size: 16px;
-  line-height: 19px;
+  font-size: 12px;
+  line-height: 14px;
   
   svg {
     margin-right: 8px;
+  }
+  
+  &:hover {
+    background: var(--gray-1);
   }
 `;
 
 const BackButtonWithIcon: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = props => (
   <BackButton {...props}>
-    <svg width="11" height="19" viewBox="0 0 11 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path fillRule="evenodd" clipRule="evenodd" d="M2.82843 9.50001L10.1213 16.7929L8.70711 18.2071L0 9.50001L8.70711 0.792908L10.1213 2.20712L2.82843 9.50001Z" fill="black"/>
+    <svg height="14" viewBox="0 0 11 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fillRule="evenodd" clipRule="evenodd"
+            d="M2.82843 9.50001L10.1213 16.7929L8.70711 18.2071L0 9.50001L8.70711 0.792908L10.1213 2.20712L2.82843 9.50001Z"
+            fill="#292b31" />
     </svg>
     {props.children}
   </BackButton>
 );
+
+const DiedCaption = styled.div`
+  margin-left: auto;
+  font-size: 12px;
+  line-height: 12px;
+`;
+
+const ContentLabel = styled.div`
+  color: var(--gray-9);
+  
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 19px;
+`;
 
 export const GamePage: React.FC<{}> = () => {
 
@@ -169,7 +221,9 @@ export const GamePage: React.FC<{}> = () => {
                 onClick={() => viewModel.setDied(member.id, !member.isDied)}
                 isDied={member.isDied}
               >
-                <MemberInfo name={member.name} icon={''} />
+                <MemberInfo name={member.name} icon={member.icon} />
+
+                {member.isDied && (<DiedCaption>やられた！</DiedCaption>)}
               </MemberOnGame>
             ))}
           </MemberContainer>
@@ -189,20 +243,19 @@ export const GamePage: React.FC<{}> = () => {
       ) : (
         <Container>
           <Header>
-            <BackButtonWithIcon >設定に戻る</BackButtonWithIcon>
+            <BackButtonWithIcon>設定に戻る</BackButtonWithIcon>
           </Header>
           <MemberContainer>
+            <ContentLabel>参加メンバー</ContentLabel>
             {viewModel.gameInfo?.members.map(member => (
-              <button onClick={() => viewModel.setDied(member.id, !member.isDied)}>
-                {member.name}
-                <br />
-                {member.color}
-              </button>
+              <MemberInfo name={member.name} icon={member.icon} />
             ))}
           </MemberContainer>
 
           <ButtonContainer>
-            <SecondaryButton onClick={handlePlayControl}>
+            <SecondaryButton
+              disabled={viewModel.gameInfo == null || viewModel.gameInfo.members.length < 1}
+              onClick={handlePlayControl}>
               ゲーム開始
             </SecondaryButton>
           </ButtonContainer>

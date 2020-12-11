@@ -11,6 +11,7 @@ type Channel = {
 type Member = {
   id: string;
   name: string;
+  icon: string;
 }
 
 type MemberWithGameInfo = Member & {

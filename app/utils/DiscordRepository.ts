@@ -51,7 +51,8 @@ export class DiscordRepository {
     return channel?.members?.map(member => {
       return {
         id: member.id,
-        name: member.displayName
+        name: member.displayName,
+        icon: member.user.avatarURL() ?? ''
       };
     }) ?? [];
   }

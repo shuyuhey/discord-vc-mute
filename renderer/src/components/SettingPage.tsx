@@ -51,10 +51,6 @@ export const SettingPage = () => {
                 <div>
                   <select
                     {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      viewModel.selectChannel(values.guildId, e.target.value);
-                    }}
                   >
                     <option> -- </option>
                     {viewModel.channels?.map((channel) => (
@@ -65,14 +61,8 @@ export const SettingPage = () => {
               )}
             </Field>
 
-            <div>
-              {viewModel.members?.map((member) => (
-                <div>{member.name}</div>
-              ))}
-            </div>
-
             <button type={'submit'}
-                    disabled={!viewModel.members || viewModel.members?.length == 0}
+                    disabled={!(values.guildId) || !(values.channelId)}
             >設定完了</button>
           </Form>
         )}

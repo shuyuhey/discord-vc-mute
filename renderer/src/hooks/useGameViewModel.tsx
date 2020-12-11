@@ -14,6 +14,22 @@ export function useGameViewModel() {
     };
   }, [setGameInfo]);
 
+  React.useEffect(() => {
+    invoke('REQUEST_SYNC_MEMBER');
+
+    if (gameInfo?.isStarted) {
+      return;
+    }
+
+    const id = setInterval(() => {
+      return invoke('REQUEST_SYNC_MEMBER');
+    }, 5000);
+
+    return () => {
+      clearInterval(id);
+    };
+  }, [gameInfo?.isStarted]);
+
   const fetchGame = React.useCallback(() => {
     return invoke('REQUEST_FETCH_GAME');
   }, []);

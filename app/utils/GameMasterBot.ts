@@ -13,24 +13,30 @@ export class GameMasterBot {
   constructor(
     guildId: Snowflake,
     meetingChannelId: Snowflake,
-    members: Member[],
     repository: DiscordRepository
   ) {
     this.guildId = guildId;
     this.meetingChannelId = meetingChannelId;
-    this.members = members.map(member => {
-      return {
-        id: member.id,
-        name: member.name,
-        color: 0,
-        isDied: false
-      };
-    });
+    this.members = [];
 
     this.isStarted = false;
     this.inMeeting = false;
 
     this.repository = repository;
+  }
+
+  async syncCurrentChannelMembers() {
+    const members = await this.repository.fetchChannelMembers(this.guildId, this.meetingChannelId);
+
+    this.members = members.map(member => {
+      return {
+        id: member.id,
+        name: member.name,
+        icon: member.icon,
+        color: 0,
+        isDied: false
+      };
+    });
   }
 
   setDied(memberId: string, isDied: boolean) {

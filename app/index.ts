@@ -52,16 +52,6 @@ ipcMain.handle('REQUEST_FETCH_CHANNELS', (e, arg: { guildId: string }) => {
   return;
 })
 
-ipcMain.handle('REQUEST_FETCH_MEMBERS', (e, arg: { guildId: string, channelId: string }) => {
-  DiscordRepository.shared().then((repository) => {
-    return repository.fetchChannelMembers(arg.guildId, arg.channelId);
-  }).then((members) => {
-    e.sender.send('COMPLETE_FETCH_MEMBERS', members);
-  });
-
-  return;
-})
-
 ipcMain.handle('COMPLETE_STANDBY', (e, arg: { guildId: string, channelId: string }) => {
   DiscordRepository.shared().then((repository) => {
     return Promise.all([
@@ -71,13 +61,17 @@ ipcMain.handle('COMPLETE_STANDBY', (e, arg: { guildId: string, channelId: string
   }).then(([repository, members]) => {
     bot = new GameMasterBot(arg.guildId,
       arg.channelId,
-      members,
       repository);
     e.sender.send('START_GAME')
   });
 });
 
 ipcMain.handle('REQUEST_FETCH_GAME', (e, arg) => {
+  e.sender.send('UPDATE_GAME', bot?.gameInfo);
+});
+
+ipcMain.handle('REQUEST_SYNC_MEMBER', (e) => {
+  bot?.syncCurrentChannelMembers();
   e.sender.send('UPDATE_GAME', bot?.gameInfo);
 });
 
