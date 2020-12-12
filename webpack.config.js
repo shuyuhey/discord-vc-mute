@@ -1,7 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const contextPath = path.join(__dirname, 'src')
-const outputPath = path.join(__dirname, '../app/dist')
+const outputPath = path.join(__dirname, 'build')
 
 const renderer = {
   target: 'electron-renderer',

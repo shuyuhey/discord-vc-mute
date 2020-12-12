@@ -14,8 +14,8 @@ function createWindow() {
     }
   })
 
-  // win.loadFile('./index.html');
-  win.loadURL('http://0.0.0.0:3035/');
+  win.loadFile(`${__dirname}/../index.html`);
+  // win.loadURL('http://0.0.0.0:3035/');
 
   win.on('ready-to-show', () => {
     win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');

@@ -6,8 +6,8 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "sourceMap": true,
-    "rootDir": ".",
-    "outDir": "./dist",
+    "rootDir": "..",
+    "outDir": "../build",
     "lib": [
       "dom",
       "es5",
@@ -16,7 +16,13 @@
     ],
     "typeRoots": [
       "node_modules/@types",
-      "./types"
-    ]
+      "electron/types"
+    ],
+    "baseUrl": "..",
+    "paths": {
+      "*": [
+        "./electron/types/*"
+      ]
+    }
   }
 }

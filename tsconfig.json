@@ -15,16 +15,16 @@
     "typeRoots": [
       "node_modules/@types",
       "types",
-      "../app/types"
+      "./electron/types"
     ]
   },
   "exclude": [
-    "./node_modules"
+    "./renderer/node_modules"
   ],
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "**/*.d.ts",
-    "../app/types/*.d.ts"
+    "../electron/types/*.d.ts"
   ]
 }
