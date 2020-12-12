@@ -1,6 +1,8 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { DiscordRepository } from "./utils/DiscordRepository";
 import { GameMasterBot } from "./utils/GameMasterBot";
+import * as isDev from 'electron-is-dev';
+import * as path from "path";
 
 let bot: GameMasterBot | null = null;
 
@@ -14,12 +16,24 @@ function createWindow() {
     }
   })
 
-  win.loadFile(`${__dirname}/../index.html`);
-  // win.loadURL('http://0.0.0.0:3035/');
+  if (isDev){
+    win.loadURL('http://0.0.0.0:3035/');
+    win.webContents?.openDevTools();
+  } else {
+    win.loadFile(`${__dirname}/../index.html`);
+  }
 
   win.on('ready-to-show', () => {
     win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
   });
+
+  if (isDev) {
+    require('electron-reload')(__dirname, {
+      electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
+      forceHardReset: true,
+      hardResetMethod: 'exit'
+    });
+  }
 }
 
 app.whenReady().then(createWindow);
