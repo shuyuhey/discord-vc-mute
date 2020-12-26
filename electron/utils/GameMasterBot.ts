@@ -2,8 +2,8 @@ import { Snowflake } from 'discord.js';
 import { DiscordRepository } from "./DiscordRepository";
 
 export class GameMasterBot {
-  private guildId: Snowflake;
-  private meetingChannelId: Snowflake;
+  private readonly guildId: Snowflake;
+  private readonly meetingChannelId: Snowflake;
   private members: MemberWithGameInfo[];
   private isStarted: boolean;
   private inMeeting: boolean;
@@ -50,25 +50,33 @@ export class GameMasterBot {
   }
 
   makePlayMode() {
-    return Promise.all([
-      this.repository.setDeafMembers(this.guildId,
-        this.members.filter(member => !member.isDied).map(member => member.id), true),
-      this.repository.setMuteMembers(this.guildId,
-        this.members.filter(member => member.isDied).map(member => member.id), false)
-    ]).then(() => {
-      this.inMeeting = false;
-    });
+    const nextMemberStatus = this.members.map((member) => {
+      return {
+        id: member.id,
+        mute: !member.isDied,
+        deaf: !member.isDied
+      };
+    })
+
+    return this.repository.setMemberStatuses(this.guildId, nextMemberStatus)
+      .then(() => {
+        this.inMeeting = false;
+      });
   }
 
   makeDiscussionMode() {
-    return Promise.all([
-      this.repository.setDeafMembers(this.guildId,
-        this.members.map(member => member.id), false),
-      this.repository.setMuteMembers(this.guildId,
-        this.members.filter(member => member.isDied).map(member => member.id), true)
-    ]).then(() => {
-      this.inMeeting = true;
-    });
+    const nextMemberStatus = this.members.map((member) => {
+      return {
+        id: member.id,
+        mute: member.isDied,
+        deaf: false
+      };
+    })
+
+    return this.repository.setMemberStatuses(this.guildId, nextMemberStatus)
+      .then(() => {
+        this.inMeeting = true;
+      });
   }
 
   startPlay() {
@@ -79,17 +87,26 @@ export class GameMasterBot {
   }
 
   finishPlay() {
-    return Promise.all([
-      this.repository.setDeafMembers(this.guildId, this.members.map(member => member.id), false),
-      this.repository.setMuteMembers(this.guildId, this.members.map(member => member.id), false)
-    ]).then(() => {
-      this.members = this.members.map(member => ({
-        ...member,
-        isDied: false
-      }));
-      this.isStarted = false;
-      this.inMeeting = false;
-    });
+    const nextMemberStatus = this.members.map((member) => {
+      return {
+        id: member.id,
+        mute: false,
+        deaf: false
+      };
+    })
+
+    return this.repository.setMemberStatuses(this.guildId, nextMemberStatus)
+      .then(() => {
+        this.inMeeting = true;
+      })
+      .then(() => {
+        this.members = this.members.map(member => ({
+          ...member,
+          isDied: false
+        }));
+        this.isStarted = false;
+        this.inMeeting = false;
+      });
   }
 
   get gameInfo(): GameInfo {

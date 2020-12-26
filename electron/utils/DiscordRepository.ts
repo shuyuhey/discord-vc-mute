@@ -63,18 +63,17 @@ export class DiscordRepository {
       .filter(member => member != null) as Discord.GuildMember[];
   }
 
-  async setDeafMembers(guildId: string, memberIds: string[], deaf: boolean) {
-    const members = await this.findGuildMembers(guildId, memberIds);
-    return await Promise.all(members.map(member => {
-      return Promise.all([
-        member.voice.setDeaf(deaf),
-        member.voice.setMute(deaf)
-      ])
-    }));
-  }
-
   async setMuteMembers(guildId: string, memberIds: string[], mute: boolean) {
     const members = await this.findGuildMembers(guildId, memberIds);
     return await Promise.all(members.map(member => member.voice.setMute(mute)));
+  }
+
+  async setMemberStatuses(guildId: string, nextMemberStatus: { deaf: boolean; mute: boolean; id: string }[]) {
+    const guild = await this.client.guilds.fetch(guildId, true);
+
+    return Promise.all(nextMemberStatus.map(({ id: member_id, deaf, mute }) => {
+      return guild.member(member_id)?.edit({ deaf, mute }) ?? Promise.resolve(null);
+      })
+    );
   }
 }
