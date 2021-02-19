@@ -131,7 +131,7 @@ export const SettingPage = () => {
                   >
                     <option> --</option>
                     {guilds.map((guild) => (
-                      <option value={guild.id}>{guild.name}</option>
+                      <option key={guild.id} value={guild.id}>{guild.name}</option>
                     ))}
                   </SelectField>
                 </FieldContainer>
@@ -147,15 +147,16 @@ export const SettingPage = () => {
                   >
                     <option> --</option>
                     {channels.map((channel) => (
-                      <option value={channel.id}>{channel.name}</option>
+                      <option key={channel.id} value={channel.id}>{channel.name}</option>
                     ))}
                   </SelectField>
                 </FieldContainer>
               )}
             </Field>
             <ButtonContainer>
-              <PrimaryButton type={'submit'}
-                             disabled={!(values.guildId) || !(values.channelId)}
+              <PrimaryButton
+                type={'submit'}
+                disabled={!(values.guildId) || !(values.channelId)}
               >設定完了
               </PrimaryButton>
             </ButtonContainer>

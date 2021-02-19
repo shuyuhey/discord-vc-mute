@@ -71,6 +71,39 @@ const MemberOnGame = styled.button<{ isDied: boolean }>`
   ${props => props.isDied ? 'filter: grayscale(100%);' : ''};
 `;
 
+const MemberInfoOnGame: React.FC<MemberWithGameInfo & { setDied: (id: string, isDied: boolean) => Promise<void> }> = props => {
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const [isDied, setIsDied] = React.useState(props.isDied);
+
+  const handleOnClick = React.useCallback(() => {
+    setIsLoading(true);
+    setIsDied(!props.isDied);
+    props.setDied(props.id, !props.isDied)
+      .catch(() => {
+        setIsDied(props.isDied);
+      }).finally(() => {
+      setIsLoading(false);
+    });
+  }, [setIsDied, props, setIsLoading]);
+
+  React.useEffect(() => {
+    setIsDied(props.isDied);
+  }, [props.isDied])
+
+  return (
+    <MemberOnGame
+      onClick={handleOnClick}
+      isDied={isDied}
+      disabled={isLoading}
+    >
+      <MemberInfo name={props.name} icon={props.icon} />
+
+      {isDied && (<DiedCaption>やられた！</DiedCaption>)}
+    </MemberOnGame>
+  );
+};
+
 const ButtonContainer = styled.div`
   margin-top: auto;
   padding: 16px;
@@ -208,14 +241,7 @@ export const GamePage: React.FC<{}> = () => {
 
           <MemberContainer>
             {gameInfo?.members.map(member => (
-              <MemberOnGame
-                onClick={() => setDied(member.id, !member.isDied)}
-                isDied={member.isDied}
-              >
-                <MemberInfo name={member.name} icon={member.icon} />
-
-                {member.isDied && (<DiedCaption>やられた！</DiedCaption>)}
-              </MemberOnGame>
+              <MemberInfoOnGame {...member} key={member.id} setDied={setDied} />
             ))}
           </MemberContainer>
 
@@ -243,7 +269,10 @@ export const GamePage: React.FC<{}> = () => {
           <MemberContainer>
             <ContentLabel>参加メンバー</ContentLabel>
             {gameInfo?.members.map(member => (
-              <MemberInfo name={member.name} icon={member.icon} />
+              <MemberInfo
+                key={member.id}
+                name={member.name}
+                icon={member.icon} />
             ))}
           </MemberContainer>
 
