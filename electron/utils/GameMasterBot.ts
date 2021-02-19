@@ -40,7 +40,7 @@ export class GameMasterBot {
   }
 
   setDied(memberId: string, isDied: boolean) {
-    this.repository.setMuteMembers(this.guildId,[memberId], true)
+    return this.repository.setMuteMembers(this.guildId,[memberId], true)
       .then(() => {
         this.members = this.members.map(member => ({
           ...member,

@@ -1,10 +1,10 @@
-import { useSettingViewModel } from "../hooks/useSettingViewModel";
 import React from "react";
 import { Field, FieldProps, Form, Formik } from "formik";
 import styled from "@emotion/styled";
 import { PrimaryButton } from "./Button";
+import { invoke } from "../lib/subscribe";
 
-const Container = styled.div` 
+const Container = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100%;
@@ -24,7 +24,7 @@ const FieldLabel = styled.div`
   font-weight: 500;
   font-size: 20px;
   line-height: 23px;
-  
+
   color: var(--gray-9);
 `;
 
@@ -36,7 +36,7 @@ const SelectLabel = styled.label`
   border: solid var(--gray-9) 2px;
   border-radius: 4px;
   box-sizing: border-box;
-  
+
   > svg {
     position: absolute;
     right: 12px;
@@ -52,10 +52,10 @@ const Select = styled.select`
   outline: none;
   border: none;
   width: 100%;
-  
+
   font-size: 20px;
   line-height: 23px;
-  
+
   padding: 8px 32px 8px 16px;
 `;
 
@@ -77,19 +77,29 @@ const StretchForm = styled(Form)`
   flex: 1;
   display: flex;
   flex-direction: column;
-  
-  padding: 32px 16px 16px;  
+
+  padding: 32px 16px 16px;
 `;
 
 
 export const SettingPage = () => {
+  // const viewModel = useSettingViewModel();
+  const [guilds, setGuilds] = React.useState<Guild[]>([]);
+  const [channels, setChannels] = React.useState<Channel[]>([]);
 
-  const viewModel = useSettingViewModel();
 
   React.useEffect(() => {
-    viewModel.fetchGuilds().then(() => {
+    invoke('REQUEST_FETCH_GUILD').then((guilds) => {
+      setGuilds(guilds)
     });
-  }, [viewModel]);
+  }, [setGuilds]);
+
+  const selectGuild = React.useCallback((guildId) => {
+    invoke('REQUEST_FETCH_CHANNELS', { guildId })
+      .then((channels) => {
+        setChannels(channels);
+      });
+  }, [setChannels]);
 
   return (
     <Container>
@@ -97,8 +107,8 @@ export const SettingPage = () => {
         guildId: string;
         channelId: string;
       }>
-        onSubmit={(values) => {
-          return viewModel.completeStandby(values.guildId, values.channelId);
+        onSubmit={({ guildId, channelId }) => {
+          return invoke('COMPLETE_STANDBY', { guildId, channelId });
         }}
         initialValues={{
           guildId: '',
@@ -115,11 +125,12 @@ export const SettingPage = () => {
                     {...field}
                     onChange={(e) => {
                       field.onChange(e);
-                      viewModel.selectGuild(e.target.value);
+
+                      selectGuild(e.target.value);
                     }}
                   >
                     <option> --</option>
-                    {viewModel.guilds?.map((guild) => (
+                    {guilds.map((guild) => (
                       <option value={guild.id}>{guild.name}</option>
                     ))}
                   </SelectField>
@@ -135,7 +146,7 @@ export const SettingPage = () => {
                     {...field}
                   >
                     <option> --</option>
-                    {viewModel.channels?.map((channel) => (
+                    {channels.map((channel) => (
                       <option value={channel.id}>{channel.name}</option>
                     ))}
                   </SelectField>
@@ -144,7 +155,7 @@ export const SettingPage = () => {
             </Field>
             <ButtonContainer>
               <PrimaryButton type={'submit'}
-                      disabled={!(values.guildId) || !(values.channelId)}
+                             disabled={!(values.guildId) || !(values.channelId)}
               >設定完了
               </PrimaryButton>
             </ButtonContainer>

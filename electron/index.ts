@@ -56,28 +56,24 @@ ipcMain.handle('RESET_SETTING', (e) => {
   return;
 });
 
-ipcMain.handle('REQUEST_FETCH_GUILD', (e, arg) => {
-  DiscordRepository.shared().then((repository) => {
+ipcMain.handle('REQUEST_FETCH_GUILD', async (e, arg) => {
+  return await DiscordRepository.shared().then((repository) => {
     return repository.fetchGuilds();
   }).then((guilds) => {
-    e.sender.send('COMPLETE_FETCH_GUILDS', guilds);
+    return guilds;
   });
-
-  return;
 })
 
-ipcMain.handle('REQUEST_FETCH_CHANNELS', (e, arg: { guildId: string }) => {
-  DiscordRepository.shared().then((repository) => {
+ipcMain.handle('REQUEST_FETCH_CHANNELS', async (e, arg: { guildId: string }) => {
+  return await DiscordRepository.shared().then((repository) => {
     return repository.fetchVoiceChannels(arg.guildId);
   }).then((channels) => {
-    e.sender.send('COMPLETE_FETCH_CHANNELS', channels);
+    return channels;
   });
-
-  return;
 })
 
-ipcMain.handle('COMPLETE_STANDBY', (e, arg: { guildId: string, channelId: string }) => {
-  DiscordRepository.shared().then((repository) => {
+ipcMain.handle('COMPLETE_STANDBY', async (e, arg: { guildId: string, channelId: string }) => {
+  return await DiscordRepository.shared().then((repository) => {
     return Promise.all([
       Promise.resolve(repository),
       repository.fetchChannelMembers(arg.guildId, arg.channelId)
@@ -86,44 +82,48 @@ ipcMain.handle('COMPLETE_STANDBY', (e, arg: { guildId: string, channelId: string
     bot = new GameMasterBot(arg.guildId,
       arg.channelId,
       repository);
-    e.sender.send('START_GAME')
+    e.sender.send('START_GAME');
+    return;
   });
 });
 
 ipcMain.handle('REQUEST_FETCH_GAME', (e, arg) => {
   e.sender.send('UPDATE_GAME', bot?.gameInfo);
+  return bot?.gameInfo;
 });
 
 ipcMain.handle('REQUEST_SYNC_MEMBER', (e) => {
   bot?.syncCurrentChannelMembers();
   e.sender.send('UPDATE_GAME', bot?.gameInfo);
+  return bot?.gameInfo;
 });
 
 ipcMain.handle('START_PLAY', (e) => {
   return bot?.startPlay().then(() => {
-    e.sender.send('UPDATE_GAME', bot?.gameInfo);
+    return bot?.gameInfo;
   });
 });
 
 ipcMain.handle('FINISH_PLAY', (e) => {
   return bot?.finishPlay().then(() => {
-    e.sender.send('UPDATE_GAME', bot?.gameInfo);
+    return bot?.gameInfo;
   });
 });
 
 ipcMain.handle('START_MEETING', (e) => {
   return bot?.makeDiscussionMode().then(() => {
-    e.sender.send('UPDATE_GAME', bot?.gameInfo);
+    return bot?.gameInfo;
   });
 });
 
 ipcMain.handle('FINISH_MEETING', (e) => {
   return bot?.makePlayMode().then(() => {
-    e.sender.send('UPDATE_GAME', bot?.gameInfo);
+    return bot?.gameInfo;
   });
 });
 
 ipcMain.handle('SET_DIED', (e, arg: { memberId: string, isDied: boolean }) => {
-  bot?.setDied(arg.memberId, arg.isDied);
-  e.sender.send('UPDATE_GAME', bot?.gameInfo);
+  return bot?.setDied(arg.memberId, arg.isDied).then(() => {
+    return bot?.gameInfo;
+  });
 });
