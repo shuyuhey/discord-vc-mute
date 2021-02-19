@@ -47,7 +47,7 @@ const MemberInfoContainer = styled.div`
 
 const MemberInfo: React.FC<{ name: string; icon: string; }> = (props) => (
   <MemberInfoContainer>
-    <img src={props.icon} alt={`${props.name}のアイコン`} />
+    <img src={props.icon} alt={`${props.name}のアイコン`} onError={(e) => e.currentTarget.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='} />
     <span>@{props.name}</span>
   </MemberInfoContainer>
 );
