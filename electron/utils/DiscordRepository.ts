@@ -57,15 +57,12 @@ export class DiscordRepository {
     }) ?? [];
   }
 
-  private async findGuildMembers(guildId: string, memberIds: string[]) {
-    const guild = await this.client.guilds.fetch(guildId, true);
-    return memberIds.map((memberId) => guild.member(memberId))
-      .filter(member => member != null) as Discord.GuildMember[];
-  }
-
   async setMuteMembers(guildId: string, memberIds: string[], mute: boolean) {
-    const members = await this.findGuildMembers(guildId, memberIds);
-    return await Promise.all(members.map(member => member.voice.setMute(mute)));
+    const guild = await this.client.guilds.fetch(guildId, true);
+
+    return await Promise.all(memberIds.map(id => {
+      return guild.member(id)?.voice?.setMute(mute);
+    }));
   }
 
   async setMemberStatuses(guildId: string, nextMemberStatus: { deaf: boolean; mute: boolean; id: string }[]) {
