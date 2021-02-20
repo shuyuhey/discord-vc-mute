@@ -13,9 +13,9 @@
     ]
   },
   "scripts": {
-    "dev": "webpack-cli serve --mode development",
+    "dev": "webpack-cli serve --mode development --config webpack.development.config.js",
     "electron:dev": "concurrently \"yarn dev\" \"wait-on http://localhost:3035 && tsc -p electron -w\" \"wait-on http://localhost:3035 && tsc -p electron && electron .\"",
-    "build": "webpack && tsc -p electron && electron-builder"
+    "build": "rm -rf build/* && webpack --config webpack.production.config.js && tsc -p electron && electron-builder"
   },
   "dependencies": {
     "@discordjs/opus": "^0.4.0",
@@ -43,6 +43,7 @@
     "wait-on": "^5.2.0",
     "webpack": "^5.10.0",
     "webpack-cli": "^4.2.0",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.0",
+    "webpack-merge": "^5.7.3"
   }
 }
