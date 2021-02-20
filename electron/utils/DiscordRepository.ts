@@ -53,12 +53,9 @@ export class DiscordRepository {
     }) ?? [];
   }
 
-  async setMuteMembers(guildId: string, memberIds: string[], mute: boolean) {
+  async setMemberStatus(guildId: string, memberId: string, mute: boolean, deaf: boolean) {
     const guild = await this.client.guilds.fetch(guildId, true);
-
-    return await Promise.all(memberIds.map(id => {
-      return guild.member(id)?.voice?.setMute(mute);
-    }));
+    return guild.member(memberId)?.edit({ mute, deaf });
   }
 
   async setMemberStatuses(guildId: string, nextMemberStatus: { deaf: boolean; mute: boolean; id: string }[]) {

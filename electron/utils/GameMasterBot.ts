@@ -40,7 +40,15 @@ export class GameMasterBot {
   }
 
   setDied(memberId: string, isDied: boolean) {
-    return this.repository.setMuteMembers(this.guildId,[memberId], true)
+    const [mute, deaf] = (()=>{
+      if (this.inMeeting) {
+        return [isDied, false];
+      } else {
+        return [!isDied, !isDied];
+      }
+    })();
+
+    return this.repository.setMemberStatus(this.guildId,memberId, mute, deaf)
       .then(() => {
         this.members = this.members.map(member => ({
           ...member,
