@@ -3,16 +3,16 @@ import { subscribe } from "../lib/subscribe";
 
 
 type AppContextState = {
-  mode: 'SETTING' | 'GAME';
+  mode: 'SPLASH' | 'TOKEN' | 'SETTING' | 'GAME';
 }
 
 export const AppContext = React.createContext<AppContextState>({
-  mode: "SETTING"
+  mode: "SPLASH"
 });
 
 
 export const AppContextProvider: React.FC<{ mode?: AppContextState['mode'] }> = props => {
-  const [mode, setMode] = React.useState<AppContextState['mode']>(props.mode ?? 'SETTING');
+  const [mode, setMode] = React.useState<AppContextState['mode']>(props.mode ?? 'SPLASH');
 
   React.useEffect(() => {
     const unsubscribeInitialMode = subscribe('UPDATE_MODE', (e, arg: AppContextState['mode']) => {

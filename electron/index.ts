@@ -3,8 +3,10 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { DiscordRepository } from "./utils/DiscordRepository";
 import { GameMasterBot } from "./utils/GameMasterBot";
 import * as path from "path";
+import ElectronStore from "electron-store";
 
 let bot: GameMasterBot | null = null;
+const store = new ElectronStore();
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -24,7 +26,14 @@ function createWindow() {
   }
 
   win.on('ready-to-show', () => {
-    win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
+    const token = store.get('token');
+    if (token) {
+      DiscordRepository.setupWithToken(String(token)).then(() => {
+        win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
+      });
+    } else {
+      win.webContents.send('UPDATE_MODE', 'TOKEN');
+    }
   });
 
   if (!app.isPackaged) {
@@ -50,6 +59,22 @@ app.on('activate', () => {
   }
 });
 
+ipcMain.handle('FETCH_BOT_TOKEN', async (e, arg) => {
+  return store.get('token');
+});
+
+ipcMain.handle('SET_BOT_TOKEN', async (e, arg: { token: string }) => {
+  store.set('token', arg.token);
+  return DiscordRepository.setupWithToken(arg.token).then(() => {
+    e.sender.send('UPDATE_MODE', 'SETTING');
+  });
+});
+
+ipcMain.handle('RESET_TOKEN', (e) => {
+  e.sender.send('UPDATE_MODE', 'TOKEN');
+  return;
+});
+
 ipcMain.handle('RESET_SETTING', (e) => {
   bot = null;
   e.sender.send('UPDATE_MODE', 'SETTING');
@@ -57,34 +82,30 @@ ipcMain.handle('RESET_SETTING', (e) => {
 });
 
 ipcMain.handle('REQUEST_FETCH_GUILD', async (e, arg) => {
-  return await DiscordRepository.shared().then((repository) => {
-    return repository.fetchGuilds();
-  }).then((guilds) => {
-    return guilds;
-  });
+  return await DiscordRepository.shared.fetchGuilds()
+    .then((guilds) => {
+      return guilds;
+    });
 })
 
 ipcMain.handle('REQUEST_FETCH_CHANNELS', async (e, arg: { guildId: string }) => {
-  return await DiscordRepository.shared().then((repository) => {
-    return repository.fetchVoiceChannels(arg.guildId);
-  }).then((channels) => {
-    return channels;
-  });
+  return await DiscordRepository.shared.fetchVoiceChannels(arg.guildId)
+    .then((channels) => {
+      return channels;
+    });
 })
 
 ipcMain.handle('COMPLETE_STANDBY', async (e, arg: { guildId: string, channelId: string }) => {
-  return await DiscordRepository.shared().then((repository) => {
-    return Promise.all([
-      Promise.resolve(repository),
-      repository.fetchChannelMembers(arg.guildId, arg.channelId)
-    ]);
-  }).then(([repository, members]) => {
-    bot = new GameMasterBot(arg.guildId,
-      arg.channelId,
-      repository);
-    e.sender.send('START_GAME');
-    return;
-  });
+  const repository = DiscordRepository.shared;
+
+  repository.fetchChannelMembers(arg.guildId, arg.channelId)
+    .then((members) => {
+      bot = new GameMasterBot(arg.guildId,
+        arg.channelId,
+        repository);
+      e.sender.send('START_GAME');
+      return;
+    });
 });
 
 ipcMain.handle('REQUEST_FETCH_GAME', (e, arg) => {

@@ -1,19 +1,15 @@
 import * as Discord from 'discord.js';
 
-require('dotenv').config();
-
-const TOKEN = process.env.TOKEN;
-
 export class DiscordRepository {
-  private static _shared: DiscordRepository;
+  static shared: DiscordRepository;
 
-  static async shared() {
-    if (!this._shared) {
+  static async setupWithToken(token: string) {
+    if (!this.shared) {
       const client = new Discord.Client()
-      await client.login(TOKEN);
-      this._shared = new DiscordRepository(client);
+      await client.login(token);
+      this.shared = new DiscordRepository(client);
     }
-    return this._shared;
+    return this.shared;
   }
 
   private client: Discord.Client;

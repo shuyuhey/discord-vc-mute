@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2015",
     "module": "commonjs",
     "strict": true,
     "moduleResolution": "node",
@@ -10,9 +10,8 @@
     "outDir": "../build",
     "lib": [
       "dom",
-      "es5",
-      "scripthost",
-      "es2015.promise"
+      "ScriptHost",
+      "es2015"
     ],
     "typeRoots": [
       "node_modules/@types",
