@@ -18,13 +18,13 @@ export const PrimaryButton = styled.button`
   font-size: 20px;
   line-height: 23px;
 
-  color: var(--gray-0);
+  color: var(--gray-9);
   
   cursor: pointer;
   
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.7;
+    opacity: 0.3;
   }
 `;
 

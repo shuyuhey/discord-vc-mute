@@ -4,6 +4,8 @@ import { PrimaryButton, SecondaryButton } from "../components/Button";
 import { invoke } from "../lib/subscribe";
 import { Header } from "../components/Header";
 import { BackButtonWithIcon } from "../components/BackButtonWithIcon";
+import { MemberInfoOnGame } from "../components/MemberInfoOnGame";
+import { MemberInfo } from "../components/MemberInfo";
 
 const MemberContainer = styled.div`
   padding: 16px;
@@ -15,94 +17,9 @@ const MemberContainer = styled.div`
   }
 `;
 
-const MemberInfoContainer = styled.div`
-  display: flex;
-  align-items: center;
-
-  font-size: 16px;
-  line-height: 19px;
-  color: var(--blue);
-
-  > img {
-    width: 32px;
-    height: auto;
-    line-height: 1;
-    border-radius: 16px;
-  }
-
-  > * + * {
-    margin-left: 8px;
-  }
-`;
-
-const MemberInfo: React.FC<{ name: string; icon: string; }> = (props) => (
-  <MemberInfoContainer>
-    <img src={props.icon} alt={`${props.name}のアイコン`}
-         onError={(e) => e.currentTarget.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='} />
-    <span>@{props.name}</span>
-  </MemberInfoContainer>
-);
-
-
-const MemberOnGame = styled.button<{ isDied: boolean }>`
-  appearance: none;
-  outline: none;
-  border: none;
-
-  padding: 16px 24px;
-  background: #F2F2F2;
-  border-radius: 50px;
-
-  display: flex;
-  align-items: center;
-
-  cursor: pointer;
-
-  ${props => props.isDied ? 'filter: grayscale(100%);' : ''};
-`;
-
-const MemberInfoOnGame: React.FC<MemberWithGameInfo & { setDied: (id: string, isDied: boolean) => Promise<void> }> = props => {
-  const [isLoading, setIsLoading] = React.useState(false);
-
-  const [isDied, setIsDied] = React.useState(props.isDied);
-
-  const handleOnClick = React.useCallback(() => {
-    setIsLoading(true);
-    setIsDied(!props.isDied);
-    props.setDied(props.id, !props.isDied)
-      .catch(() => {
-        setIsDied(props.isDied);
-      }).finally(() => {
-      setIsLoading(false);
-    });
-  }, [setIsDied, props, setIsLoading]);
-
-  React.useEffect(() => {
-    setIsDied(props.isDied);
-  }, [props.isDied])
-
-  return (
-    <MemberOnGame
-      onClick={handleOnClick}
-      isDied={isDied}
-      disabled={isLoading}
-    >
-      <MemberInfo name={props.name} icon={props.icon} />
-
-      {isDied && (<DiedCaption>やられた！</DiedCaption>)}
-    </MemberOnGame>
-  );
-};
-
 const ButtonContainer = styled.div`
   margin-top: auto;
   padding: 16px;
-`;
-
-const DiedCaption = styled.div`
-  margin-left: auto;
-  font-size: 12px;
-  line-height: 12px;
 `;
 
 const ContentLabel = styled.div`
@@ -193,7 +110,11 @@ export const GamePage: React.FC<{}> = () => {
 
           <MemberContainer>
             {gameInfo?.members.map(member => (
-              <MemberInfoOnGame {...member} key={member.id} setDied={setDied} />
+              <MemberInfoOnGame
+                {...member}
+                key={member.id}
+                setDied={setDied}
+              />
             ))}
           </MemberContainer>
 

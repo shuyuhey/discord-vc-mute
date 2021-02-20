@@ -22,8 +22,7 @@ export const FieldContainer = styled.div`
 
 export const FieldLabel = styled.div`
   font-weight: 500;
-  font-size: 20px;
-  line-height: 23px;
+  font-size: 0.9rem;
 
   color: var(--gray-9);
 `;
