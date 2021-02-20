@@ -35,15 +35,15 @@ export const GamePage: React.FC<{}> = () => {
   const [gameInfo, setGameInfo] = React.useState<Optional<GameInfo>>(null);
 
   React.useEffect(() => {
-    invoke('REQUEST_SYNC_MEMBER');
+    invoke('REQUEST_SYNC_MEMBER').then((game) => setGameInfo(game));
 
     if (gameInfo?.isStarted) {
       return;
     }
 
     const id = setInterval(() => {
-      return invoke('REQUEST_SYNC_MEMBER');
-    }, 5000);
+      invoke('REQUEST_SYNC_MEMBER').then((game) => setGameInfo(game));
+    }, 3000);
 
     return () => {
       clearInterval(id);
@@ -153,7 +153,7 @@ export const GamePage: React.FC<{}> = () => {
             <SecondaryButton
               disabled={gameInfo == null || gameInfo.members.length < 1}
               onClick={handlePlayControl}>
-              ゲーム開始
+              {(gameInfo?.members?.length ?? 0) > 0 ? 'ゲーム開始' : 'メンバーを待機中'}
             </SecondaryButton>
           </ButtonContainer>
         </>

@@ -51,8 +51,8 @@ export const SecondaryButton = styled.button`
   cursor: pointer;
   
   &:disabled {
-    color: #C4C4C4;
-    border-color: #C4C4C4;
+    color: var(--gray-9);
+    border-color: var(--gray-9);
     cursor: not-allowed;
   }
 `;
