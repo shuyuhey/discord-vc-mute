@@ -1,21 +1,32 @@
 {
-  "name": "t4au",
-  "description": "t4au",
-  "homepage": ".",
+  "name": "discord-vc-mute",
+  "description": "Tool for all user mute in Discord voice channel",
+  "homepage": "https://github.com/shuyuhey/discord-vc-mute",
   "main": "build/electron/index.js",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "build": {
-    "appId": "me.shuyuhey.app.t4au",
+    "appId": "me.shuyuhey.app.discord-vc-mute",
     "files": [
       "build",
       "package.json",
       "yarn.lock"
-    ]
+    ],
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      }
+    }
   },
   "scripts": {
     "dev": "webpack-cli serve --mode development --config webpack.development.config.js",
     "electron:dev": "concurrently \"yarn dev\" \"wait-on http://localhost:3035 && tsc -p electron -w\" \"wait-on http://localhost:3035 && tsc -p electron && electron .\"",
-    "build": "rm -rf build/* && webpack --config webpack.production.config.js && tsc -p electron && electron-builder"
+    "build": "rm -rf build/* && webpack --config webpack.production.config.js && tsc -p electron && electron-builder -mw"
   },
   "dependencies": {
     "@discordjs/opus": "^0.4.0",
