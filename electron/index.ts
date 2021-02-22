@@ -30,7 +30,10 @@ function createWindow() {
     if (token) {
       DiscordRepository.setupWithToken(String(token)).then(() => {
         win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
-      });
+      })
+        .catch((error) => {
+          win.webContents.send('UPDATE_MODE', 'TOKEN');
+        });
     } else {
       win.webContents.send('UPDATE_MODE', 'TOKEN');
     }

@@ -1,6 +1,6 @@
 import React from "react";
 import { Field, FieldProps, Formik } from "formik";
-import { FieldContainer, FieldLabel, StretchForm } from "../components/FormComponents";
+import { ErrorLabel, FieldContainer, FieldLabel, StretchForm } from "../components/FormComponents";
 import { InputField } from "../components/InputField";
 import styled from "@emotion/styled";
 import { PrimaryButton } from "../components/Button";
@@ -23,17 +23,26 @@ export const TokenPage = () => {
     }>
       enableReinitialize
       initialValues={{ token: token }}
-      onSubmit={(values) => {
-        invoke('SET_BOT_TOKEN', values).then();
+      onSubmit={(values, formikHelpers) => {
+        invoke('SET_BOT_TOKEN', values)
+          .catch((error) => {
+            formikHelpers.setErrors({ 'token': 'トークンが間違っています' });
+          });
       }}
     >
       {({ isValid, isSubmitting }) => (
         <StretchForm>
           <Field name={'token'}>
-            {({ field }: FieldProps) => (
+            {({ field, meta }: FieldProps) => (
               <FieldContainer>
                 <FieldLabel>Bot Token</FieldLabel>
                 <InputField type={'password'} {...field} />
+
+                {meta.error && meta.touched && (
+                  <div style={{ marginTop: 8 }}>
+                    <ErrorLabel>{meta.error}</ErrorLabel>
+                  </div>
+                )}
               </FieldContainer>
             )}
           </Field>
