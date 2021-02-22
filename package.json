@@ -21,7 +21,7 @@
     "dev": "webpack-cli serve --mode development --config webpack.development.config.js",
     "electron:dev": "concurrently \"yarn dev\" \"wait-on http://localhost:3035 && tsc -p electron -w\" \"wait-on http://localhost:3035 && tsc -p electron && electron .\"",
     "build:assets": "rm -rf build/* && webpack --config webpack.production.config.js && tsc -p electron",
-    "pack": "electron-builder --publish onTag"
+    "pack": "electron-builder --publish=never"
   },
   "dependencies": {
     "@discordjs/opus": "^0.4.0",

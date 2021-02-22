@@ -6,6 +6,18 @@ on:
       - 'v*'
 
 jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+          uses: actions/create-release@v1.0.0
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            tag_name: ${{ github.ref }}
+            release_name: Release ${{ github.ref }}
+            draft: true
+            prerelease: false
   build:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -21,18 +33,16 @@ jobs:
         run: |
           yarn
           yarn run build:assets
-      - name: Create release
-        uses: actions/create-release@v1.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: true
-          prerelease: false
       - name: Packaging
         run: |
           yarn
           yarn run pack
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: "dist/**/*.{exe,dmg,zip}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
