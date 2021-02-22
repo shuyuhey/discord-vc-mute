@@ -27,3 +27,9 @@ export const FieldLabel = styled.div`
   color: var(--gray-9);
 `;
 
+export const ErrorLabel = styled.div`
+  font-weight: 500;
+  font-size: 0.8rem;
+  
+  color: var(--fatal);
+`;

@@ -4,12 +4,9 @@ export class DiscordRepository {
   static shared: DiscordRepository;
 
   static async setupWithToken(token: string) {
-    if (!this.shared) {
-      const client = new Discord.Client()
-      await client.login(token);
-      this.shared = new DiscordRepository(client);
-    }
-    return this.shared;
+    const client = new Discord.Client()
+    await client.login(token);
+    this.shared = new DiscordRepository(client);
   }
 
   private client: Discord.Client;

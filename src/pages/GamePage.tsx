@@ -18,8 +18,14 @@ const MemberContainer = styled.div`
 `;
 
 const ButtonContainer = styled.div`
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
   margin-top: auto;
   padding: 16px;
+
+  background: linear-gradient(rgb(26, 26, 26, 0) 0.5%, rgb(26, 26, 26, 0.8) 20%, rgb(26, 26, 26, 1));
 `;
 
 const ContentLabel = styled.div`

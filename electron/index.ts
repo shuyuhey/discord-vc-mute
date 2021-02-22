@@ -10,7 +10,7 @@ const store = new ElectronStore();
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 320,
+    width: 375,
     height: 600,
     webPreferences: {
       nodeIntegration: true,
@@ -30,7 +30,10 @@ function createWindow() {
     if (token) {
       DiscordRepository.setupWithToken(String(token)).then(() => {
         win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
-      });
+      })
+        .catch((error) => {
+          win.webContents.send('UPDATE_MODE', 'TOKEN');
+        });
     } else {
       win.webContents.send('UPDATE_MODE', 'TOKEN');
     }
