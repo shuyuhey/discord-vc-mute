@@ -49,7 +49,7 @@ export const App: React.FC<{}> = () => {
           インターネット接続がありません
         </OfflineAlert>
       )}
-      
+
       <AppContextProvider>
         <AppContext.Consumer>
           {({ mode }) => {

@@ -2,8 +2,9 @@
   "name": "discord-vc-mute",
   "description": "Tool for all user mute in Discord voice channel",
   "homepage": "https://github.com/shuyuhey/discord-vc-mute",
+  "repository": "https://github.com/shuyuhey/discord-vc-mute",
   "main": "build/electron/index.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "build": {
     "appId": "me.shuyuhey.app.discord-vc-mute",
     "files": [
@@ -11,16 +12,9 @@
       "package.json",
       "yarn.lock"
     ],
-    "mac": {
-      "target": "dmg"
-    },
-    "win": {
-      "target": {
-        "target": "nsis",
-        "arch": [
-          "x64"
-        ]
-      }
+    "publish": {
+      "provider": "github",
+      "releaseType": "release"
     }
   },
   "scripts": {
