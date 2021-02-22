@@ -47,6 +47,7 @@ export const SecondaryButton = styled.button`
   line-height: 23px;
 
   color: var(--gray-9);
+  background: var(--gray-1);
   
   cursor: pointer;
   
@@ -54,5 +55,9 @@ export const SecondaryButton = styled.button`
     color: var(--gray-9);
     border-color: var(--gray-9);
     cursor: not-allowed;
+  }
+  
+  &:hover {
+    background: var(--gray-2);
   }
 `;
