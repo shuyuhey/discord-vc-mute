@@ -16,8 +16,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref }}
-          draft: true
-          prerelease: false
+          prerelease: true
   build:
     runs-on: ${{ matrix.os }}
     strategy:
