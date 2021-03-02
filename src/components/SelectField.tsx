@@ -34,8 +34,12 @@ const Select = styled.select`
 
   font-size: 0.9rem;
   color: var(--gray-9);
-
+  
   padding: 12px 32px 12px 16px;
+  
+  > option {
+    background: var(--gray-1);
+  }
 `;
 
 export const SelectField: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = props => (

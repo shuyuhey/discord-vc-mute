@@ -27,6 +27,7 @@ export const TokenPage = () => {
         invoke('SET_BOT_TOKEN', values)
           .catch((error) => {
             formikHelpers.setErrors({ 'token': 'トークンが間違っています' });
+            formikHelpers.setSubmitting(false);
           });
       }}
     >
