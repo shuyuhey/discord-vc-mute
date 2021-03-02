@@ -1,10 +1,12 @@
 {
   "name": "discord-vc-mute",
+  "author": "Shuhei Takasugi",
+  "license": "MIT",
   "description": "Tool for all user mute in Discord voice channel",
   "homepage": "https://github.com/shuyuhey/discord-vc-mute",
   "repository": "https://github.com/shuyuhey/discord-vc-mute",
   "main": "build/electron/index.js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "build": {
     "appId": "me.shuyuhey.app.discord-vc-mute",
     "files": [
@@ -24,18 +26,17 @@
     "pack": "electron-builder --publish=never"
   },
   "dependencies": {
-    "@discordjs/opus": "^0.4.0",
+    "discord.js": "^12.5.1",
+    "electron-reload": "^1.5.0",
+    "electron-store": "^7.0.1"
+  },
+  "devDependencies": {
+    "formik": "^2.2.6",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "@emotion/core": "^11.0.0",
     "@emotion/react": "^11.1.2",
     "@emotion/styled": "^11.0.0",
-    "discord.js": "^12.5.1",
-    "electron-reload": "^1.5.0",
-    "electron-store": "^7.0.1",
-    "formik": "^2.2.6",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1"
-  },
-  "devDependencies": {
     "@emotion/types": "^0.7.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
