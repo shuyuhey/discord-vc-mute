@@ -11,8 +11,11 @@ export class DiscordRepository {
 
   private client: Discord.Client;
 
+  private members: Discord.GuildMember[];
+
   constructor(client: Discord.Client) {
     this.client = client;
+    this.members = [];
   }
 
   fetchGuilds(): Promise<Guild[]> {
@@ -41,7 +44,9 @@ export class DiscordRepository {
   async fetchChannelMembers(guildId: string, channelId: string): Promise<Member[]> {
     const guild = await this.client.guilds.fetch(guildId, true);
     const channel = guild.channels.valueOf().find((channel) => channel.id === channelId);
-    return channel?.members?.map(member => {
+    this.members = channel?.members?.array() ?? [];
+
+    return this.members.map(member => {
       return {
         id: member.id,
         name: member.displayName,
@@ -56,11 +61,16 @@ export class DiscordRepository {
   }
 
   async setMemberStatuses(guildId: string, nextMemberStatus: { deaf: boolean; mute: boolean; id: string }[]) {
-    const guild = await this.client.guilds.fetch(guildId, true);
-
-    return Promise.all(nextMemberStatus.map(({ id: member_id, deaf, mute }) => {
-      return guild.member(member_id)?.edit({ deaf, mute }) ?? Promise.resolve(null);
+    return Promise.all(nextMemberStatus
+      .map(({ id: member_id, deaf, mute }) => {
+        return { member: this.members.find(member => member.id == member_id), deaf, mute };
       })
-    );
+      .map(({ member, deaf, mute }) => {
+        return member?.edit({ deaf, mute })
+          .catch((error) => {
+            console.error(error);
+            return Promise.resolve(null);
+          }) ?? Promise.resolve(null);
+      }));
   }
 }

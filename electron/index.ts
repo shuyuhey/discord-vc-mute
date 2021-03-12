@@ -101,14 +101,11 @@ ipcMain.handle('REQUEST_FETCH_CHANNELS', async (e, arg: { guildId: string }) => 
 ipcMain.handle('COMPLETE_STANDBY', async (e, arg: { guildId: string, channelId: string }) => {
   const repository = DiscordRepository.shared;
 
-  repository.fetchChannelMembers(arg.guildId, arg.channelId)
-    .then((members) => {
-      bot = new GameMasterBot(arg.guildId,
-        arg.channelId,
-        repository);
-      e.sender.send('START_GAME');
-      return;
-    });
+  bot = new GameMasterBot(arg.guildId,
+    arg.channelId,
+    repository);
+  e.sender.send('START_GAME');
+  return;
 });
 
 ipcMain.handle('REQUEST_FETCH_GAME', (e, arg) => {
