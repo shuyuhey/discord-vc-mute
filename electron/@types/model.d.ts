@@ -1,3 +1,9 @@
+type ChannelResponse = {
+  id: string;
+  name: string;
+  type: number;
+}
+
 type Guild = {
   id: string;
   name: string;

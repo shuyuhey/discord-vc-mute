@@ -13,15 +13,6 @@
       "ScriptHost",
       "es2015"
     ],
-    "typeRoots": [
-      "node_modules/@types",
-      "electron/types"
-    ],
-    "baseUrl": "..",
-    "paths": {
-      "*": [
-        "./electron/types/*"
-      ]
-    }
+    "baseUrl": ".."
   }
 }

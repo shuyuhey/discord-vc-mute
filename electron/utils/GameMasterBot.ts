@@ -62,9 +62,10 @@ export class GameMasterBot {
       return {
         id: member.id,
         mute: !member.isDied,
-        deaf: !member.isDied
+        deaf: !member.isDied,
+        isDIed: member.isDied
       };
-    })
+    }).sort(this.orderByDied('diedLast'))
 
     return this.repository.setMemberStatuses(this.guildId, nextMemberStatus)
       .then(() => {
@@ -77,9 +78,10 @@ export class GameMasterBot {
       return {
         id: member.id,
         mute: member.isDied,
-        deaf: false
+        deaf: false,
+        isDIed: member.isDied
       };
-    })
+    }).sort(this.orderByDied('diedFirst'))
 
     return this.repository.setMemberStatuses(this.guildId, nextMemberStatus)
       .then(() => {
@@ -99,9 +101,10 @@ export class GameMasterBot {
       return {
         id: member.id,
         mute: false,
-        deaf: false
+        deaf: false,
+        isDIed: member.isDied
       };
-    })
+    }).sort(this.orderByDied('diedLast'))
 
     return this.repository.setMemberStatuses(this.guildId, nextMemberStatus)
       .then(() => {
@@ -123,5 +126,20 @@ export class GameMasterBot {
       isStarted: this.isStarted,
       members: this.members
     }
+  }
+
+  private orderByDied<T extends { isDied: boolean }>(direction: 'diedFirst' | 'diedLast' = 'diedFirst'): (a: T, b: T) => number {
+
+    return (a, b) => {
+      if (a.isDied === b.isDied) {
+        return 0;
+      }
+
+      if (a.isDied) {
+        return -1 * (direction === 'diedLast' ? -1 : 1)
+      }
+
+      return 1 * (direction === 'diedLast' ? 1 : -1)
+    };
   }
 }
