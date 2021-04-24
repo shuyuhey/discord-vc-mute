@@ -13,7 +13,7 @@ export class DiscordRepository {
   }
 
   private client: Discord.Client;
-  private token: string;
+  private readonly token: string;
 
   constructor(client: Discord.Client, token: string) {
     this.client = client;
@@ -42,8 +42,8 @@ export class DiscordRepository {
 
   async fetchChannelMembers(guildId: string, channelId: string): Promise<Member[]> {
     const guild = await this.client.guilds.fetch(guildId, true);
-    const channel = guild.channels.valueOf().find((channel) => channel.id === channelId);
-    const members = channel?.members?.array() ?? [];
+    const channel = guild.channels.cache.find((channel) => channel.id === channelId);
+    const members = channel?.members.array() ?? [];
 
     return members.map(member => {
       return {
