@@ -20,6 +20,12 @@ type Member = {
   icon: string;
 }
 
+interface MuteState {
+  memberId: string;
+  mute: boolean;
+  deaf: boolean;
+}
+
 type MemberWithGameInfo = Member & {
   color: number;
   isDied: boolean;

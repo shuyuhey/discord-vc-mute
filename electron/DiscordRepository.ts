@@ -13,12 +13,10 @@ export class DiscordRepository {
   }
 
   private client: Discord.Client;
-  private members: Discord.GuildMember[];
   private token: string;
 
   constructor(client: Discord.Client, token: string) {
     this.client = client;
-    this.members = [];
     this.token = token;
   }
 
@@ -45,9 +43,9 @@ export class DiscordRepository {
   async fetchChannelMembers(guildId: string, channelId: string): Promise<Member[]> {
     const guild = await this.client.guilds.fetch(guildId, true);
     const channel = guild.channels.valueOf().find((channel) => channel.id === channelId);
-    this.members = channel?.members?.array() ?? [];
+    const members = channel?.members?.array() ?? [];
 
-    return this.members.map(member => {
+    return members.map(member => {
       return {
         id: member.id,
         name: member.displayName,
@@ -56,20 +54,20 @@ export class DiscordRepository {
     }) ?? [];
   }
 
-  async setMemberStatus(guildId: string, memberId: string, mute: boolean, deaf: boolean) {
-    return fetch(`${BASE_URL}/guilds/${guildId}/members/${memberId}`, {
+  async setMemberStatus(guildId: string, state: MuteState) {
+    return fetch(`${BASE_URL}/guilds/${guildId}/members/${state.memberId}`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bot ${this.token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ mute, deaf })
+      body: JSON.stringify({ mute: state.mute, deaf: state.deaf })
     });
   }
 
-  async setMemberStatuses(guildId: string, nextMemberStatus: { deaf: boolean; mute: boolean; id: string; }[]) {
-    return Promise.all(nextMemberStatus.map(({ id, deaf, mute }) => {
-      return this.setMemberStatus(guildId, id, mute, deaf);
+  async setMemberStatuses(guildId: string, nextMemberStatus: MuteState[]) {
+    return Promise.all(nextMemberStatus.map((state) => {
+      return this.setMemberStatus(guildId, state);
     }));
   }
 }
