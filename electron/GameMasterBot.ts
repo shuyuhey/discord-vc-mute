@@ -1,5 +1,7 @@
 import { Snowflake } from 'discord.js';
 import { DiscordRepository } from "./DiscordRepository";
+import { diedCompareFunction } from "./lib/diedCompareFunction";
+import { discussionModeMuteState, playModeMuteState, standByMuteState } from "./lib/calcMuteState";
 
 export class GameMasterBot {
   private readonly guildId: Snowflake;
@@ -40,15 +42,15 @@ export class GameMasterBot {
   }
 
   setDied(memberId: string, isDied: boolean) {
-    const [mute, deaf] = (()=>{
+    const state = (()=>{
       if (this.inMeeting) {
-        return [isDied, false];
+        return discussionModeMuteState({ id: memberId, isDied: isDied })
       } else {
-        return [!isDied, !isDied];
+        return playModeMuteState({ id: memberId, isDied: isDied })
       }
     })();
 
-    return this.repository.setMemberStatus(this.guildId,memberId, mute, deaf)
+    return this.repository.setMemberStatus(this.guildId, state)
       .then(() => {
         this.members = this.members.map(member => ({
           ...member,
@@ -58,13 +60,9 @@ export class GameMasterBot {
   }
 
   makePlayMode() {
-    const nextMemberStatus = this.members.map((member) => {
-      return {
-        id: member.id,
-        mute: !member.isDied,
-        deaf: !member.isDied
-      };
-    })
+    const nextMemberStatus = this.members
+      .sort(diedCompareFunction('diedLast'))
+      .map(playModeMuteState);
 
     return this.repository.setMemberStatuses(this.guildId, nextMemberStatus)
       .then(() => {
@@ -73,13 +71,9 @@ export class GameMasterBot {
   }
 
   makeDiscussionMode() {
-    const nextMemberStatus = this.members.map((member) => {
-      return {
-        id: member.id,
-        mute: member.isDied,
-        deaf: false
-      };
-    })
+    const nextMemberStatus = this.members
+      .sort(diedCompareFunction('diedFirst'))
+      .map(discussionModeMuteState);
 
     return this.repository.setMemberStatuses(this.guildId, nextMemberStatus)
       .then(() => {
@@ -95,13 +89,9 @@ export class GameMasterBot {
   }
 
   finishPlay() {
-    const nextMemberStatus = this.members.map((member) => {
-      return {
-        id: member.id,
-        mute: false,
-        deaf: false
-      };
-    })
+    const nextMemberStatus = this.members
+      .sort(diedCompareFunction('diedLast'))
+      .map(standByMuteState);
 
     return this.repository.setMemberStatuses(this.guildId, nextMemberStatus)
       .then(() => {

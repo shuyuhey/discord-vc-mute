@@ -1,7 +1,7 @@
 import * as electron from 'electron';
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { DiscordRepository } from "./utils/DiscordRepository";
-import { GameMasterBot } from "./utils/GameMasterBot";
+import { DiscordRepository } from "./DiscordRepository";
+import { GameMasterBot } from "./GameMasterBot";
 import * as path from "path";
 import ElectronStore from "electron-store";
 
