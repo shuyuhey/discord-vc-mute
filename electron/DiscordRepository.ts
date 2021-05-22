@@ -1,5 +1,6 @@
 import * as Discord from 'discord.js';
 import fetch from 'node-fetch';
+import { app } from 'electron';
 
 const BASE_URL = 'https://discord.com/api';
 
@@ -54,7 +55,7 @@ export class DiscordRepository {
     }) ?? [];
   }
 
-  async setMemberStatus(guildId: string, state: MuteState) {
+  async setMemberStatus(guildId: string, state: MuteState): Promise<void> {
     return fetch(`${BASE_URL}/guilds/${guildId}/members/${state.memberId}`, {
       method: 'PATCH',
       headers: {
@@ -62,6 +63,21 @@ export class DiscordRepository {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ mute: state.mute, deaf: state.deaf })
+    }).then(r => {
+      if (!app.isPackaged) {
+        console.log(r.headers);
+        r.json().then().then(r => console.log(r)).catch(e => console.error(e));
+      }
+      if (r.status === 429) {
+        const resetAfter = Number(r.headers.get('x-ratelimit-reset-after')) * 1000.0;
+        return new Promise((resolve) => {
+          setTimeout(async () => {
+            await this.setMemberStatus(guildId, state);
+            resolve();
+          }, resetAfter);
+        })
+      }
+      return Promise.resolve();
     });
   }
 
