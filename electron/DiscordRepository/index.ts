@@ -4,13 +4,20 @@ import { app } from 'electron';
 
 const BASE_URL = 'https://discord.com/api';
 
-export class DiscordRepository {
-  static shared: DiscordRepository;
+export interface DiscordRepositoryInterface {
+  fetchGuilds(): Promise<Guild[]>;
+  fetchVoiceChannels(guildId: string): Promise<Channel[]>;
+  fetchChannelMembers(guildId: string, channelId: string): Promise<Member[]>;
+  setMemberStatus(guildId: string, state: MuteState): Promise<void>;
+  setMemberStatuses(guildId: string, nextMemberStatus: MuteState[]): Promise<void>;
+}
+
+export class DiscordRepository implements DiscordRepositoryInterface {
 
   static async setupWithToken(token: string) {
     const client = new Discord.Client()
     await client.login(token);
-    this.shared = new DiscordRepository(client, token);
+    return new DiscordRepository(client, token);
   }
 
   private client: Discord.Client;
@@ -80,9 +87,9 @@ export class DiscordRepository {
     });
   }
 
-  async setMemberStatuses(guildId: string, nextMemberStatus: MuteState[]) {
+  async setMemberStatuses(guildId: string, nextMemberStatus: MuteState[]): Promise<void> {
     return Promise.all(nextMemberStatus.map((state) => {
       return this.setMemberStatus(guildId, state);
-    }));
+    })).then(() => { return; });
   }
 }

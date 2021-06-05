@@ -1,5 +1,5 @@
 import { Snowflake } from 'discord.js';
-import { DiscordRepository } from "./DiscordRepository";
+import { DiscordRepositoryInterface } from "./DiscordRepository";
 import { diedCompareFunction } from "./lib/diedCompareFunction";
 import { discussionModeMuteState, playModeMuteState, standByMuteState } from "./lib/calcMuteState";
 
@@ -10,12 +10,12 @@ export class GameMasterBot {
   private isStarted: boolean;
   private inMeeting: boolean;
 
-  private repository: DiscordRepository;
+  private repository: DiscordRepositoryInterface;
 
   constructor(
     guildId: Snowflake,
     meetingChannelId: Snowflake,
-    repository: DiscordRepository
+    repository: DiscordRepositoryInterface
   ) {
     this.guildId = guildId;
     this.meetingChannelId = meetingChannelId;

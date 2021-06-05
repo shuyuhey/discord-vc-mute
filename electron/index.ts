@@ -1,17 +1,19 @@
 import * as electron from 'electron';
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { DiscordRepository } from "./DiscordRepository";
+import { DiscordRepository, DiscordRepositoryInterface } from "./DiscordRepository";
 import { GameMasterBot } from "./GameMasterBot";
 import * as path from "path";
 import ElectronStore from "electron-store";
+import { MockedDiscordRepository } from "./DiscordRepository/MockedDiscordRepository";
 
 let bot: GameMasterBot | null = null;
+let repository: DiscordRepositoryInterface;
 const store = new ElectronStore();
 
 function createWindow() {
   const win = new BrowserWindow({
     width: 500,
-    height: 600,
+    height: 650,
     webPreferences: {
       nodeIntegration: true,
       devTools: true
@@ -26,9 +28,24 @@ function createWindow() {
   }
 
   win.on('ready-to-show', () => {
+    if (!app.isPackaged) {
+      require('electron-reload')(__dirname, {
+        electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
+        forceHardReset: true,
+        hardResetMethod: 'exit'
+      });
+
+      if (process.env.MOCK_MODE) {
+        repository = new MockedDiscordRepository();
+        win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
+        return;
+      }
+    }
+
     const token = store.get('token');
     if (token) {
-      DiscordRepository.setupWithToken(String(token)).then(() => {
+      DiscordRepository.setupWithToken(String(token)).then(r => {
+        repository = r
         win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
       })
         .catch((error) => {
@@ -37,15 +54,8 @@ function createWindow() {
     } else {
       win.webContents.send('UPDATE_MODE', 'TOKEN');
     }
-  });
 
-  if (!app.isPackaged) {
-    require('electron-reload')(__dirname, {
-      electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
-      forceHardReset: true,
-      hardResetMethod: 'exit'
-    });
-  }
+  });
 }
 
 app.whenReady().then(createWindow);
@@ -85,21 +95,20 @@ ipcMain.handle('RESET_SETTING', (e) => {
 });
 
 ipcMain.handle('REQUEST_FETCH_GUILD', async (e, arg) => {
-  return await DiscordRepository.shared.fetchGuilds()
+  return await repository.fetchGuilds()
     .then((guilds) => {
       return guilds;
     });
 })
 
 ipcMain.handle('REQUEST_FETCH_CHANNELS', async (e, arg: { guildId: string }) => {
-  return await DiscordRepository.shared.fetchVoiceChannels(arg.guildId)
+  return await repository.fetchVoiceChannels(arg.guildId)
     .then((channels) => {
       return channels;
     });
 })
 
 ipcMain.handle('COMPLETE_STANDBY', async (e, arg: { guildId: string, channelId: string }) => {
-  const repository = DiscordRepository.shared;
 
   bot = new GameMasterBot(arg.guildId,
     arg.channelId,
