@@ -7,16 +7,21 @@ const MemberOnGame = styled.button<{ isDied: boolean }>`
   outline: none;
   border: none;
 
-  padding: 16px 24px;
+  padding: 12px 16px;
   background: var(--gray-2);
-  border-radius: 50px;
+  border-radius: 24px;
+  gap: 12px;
 
   display: flex;
   align-items: center;
 
   cursor: pointer;
-
+  
   ${props => props.isDied ? 'filter: grayscale(100%);' : ''};
+  
+  &:hover {
+    background: var(--gray-3);
+  }
 `;
 
 const DiedCaption = styled.div`

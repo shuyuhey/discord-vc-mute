@@ -6,7 +6,7 @@ const SelectLabel = styled.label`
   display: inline-block;
   width: 100%;
 
-  border: solid var(--gray-9) 2px;
+  border: solid var(--gray-12) 2px;
   border-radius: 8px;
   box-sizing: border-box;
 
@@ -16,7 +16,7 @@ const SelectLabel = styled.label`
     width: 12px;
     top: calc(50% - 4px);
     pointer-events: none;
-    fill: var(--gray-9);
+    fill: var(--gray-12);
   }
 
   &:focus-within {
@@ -33,7 +33,8 @@ const Select = styled.select`
   width: 100%;
 
   font-size: 0.9rem;
-  color: var(--gray-9);
+  letter-spacing: 0.05em;
+  color: var(--gray-12);
   
   padding: 12px 32px 12px 16px;
   

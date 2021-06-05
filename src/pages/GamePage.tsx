@@ -1,11 +1,12 @@
 import React from "react";
 import styled from "@emotion/styled";
-import { PrimaryButton, SecondaryButton } from "../components/Button";
+import { SecondaryButton } from "../components/Button";
 import { invoke } from "../lib/subscribe";
 import { Header } from "../components/Header";
 import { BackButtonWithIcon } from "../components/BackButtonWithIcon";
-import { MemberInfoOnGame } from "../components/MemberInfoOnGame";
 import { MemberInfo } from "../components/MemberInfo";
+import { PlayView } from "../content/PlayView";
+import { MeetingView } from "../content/MeetingView";
 
 const MemberContainer = styled.div`
   padding: 16px;
@@ -29,11 +30,16 @@ const ButtonContainer = styled.div`
 `;
 
 const ContentLabel = styled.div`
-  color: var(--gray-9);
+  color: var(--gray-12);
 
   font-weight: bold;
   font-size: 16px;
   line-height: 19px;
+  letter-spacing: 0.03em;
+`;
+
+const ContentContainer = styled.div`
+  position: relative;
 `;
 
 export const GamePage: React.FC<{}> = () => {
@@ -79,6 +85,16 @@ export const GamePage: React.FC<{}> = () => {
       });
   }, [setGameInfo, setIsLoading]);
 
+  const setDiedWithoutUpdate = React.useCallback((memberId: string, isDied: boolean) => {
+    setIsLoading(true);
+
+    return invoke('SET_DIED_WITHOUT_UPDATE', { memberId, isDied })
+      .then((info) => {
+        setIsLoading(false);
+        setGameInfo(info);
+      });
+  }, [setGameInfo, setIsLoading]);
+
   const handlePlayControl = React.useCallback(() => {
     if (gameInfo?.isStarted) {
       return invoke('FINISH_PLAY')
@@ -114,31 +130,22 @@ export const GamePage: React.FC<{}> = () => {
             <BackButtonWithIcon onClick={handlePlayControl}>ゲーム終了</BackButtonWithIcon>
           </Header>
 
-          <MemberContainer>
-            {gameInfo?.members.map(member => (
-              <MemberInfoOnGame
-                {...member}
-                key={member.id}
-                setDied={setDied}
-              />
-            ))}
-          </MemberContainer>
-
-          <ButtonContainer>
+          <ContentContainer>
             {gameInfo?.inMeeting ? (
-              <SecondaryButton
-                disabled={isLoading}
-                onClick={handleMeetingControl}>
-                会議終了
-              </SecondaryButton>
+              <MeetingView
+                setDied={setDied}
+                setDiedWithoutUpdate={setDiedWithoutUpdate}
+                members={gameInfo?.members ?? []}
+                onClickFinishMeeting={handleMeetingControl}
+              />
             ) : (
-              <PrimaryButton
-                disabled={isLoading}
-                onClick={handleMeetingControl}>
-                会議開始
-              </PrimaryButton>
-            )}
-          </ButtonContainer>
+              <PlayView
+                setDied={setDied}
+                members={gameInfo?.members ?? []}
+                onClickStartMeeting={handleMeetingControl}
+              />
+            )};
+          </ContentContainer>
         </>
       ) : (
         <>

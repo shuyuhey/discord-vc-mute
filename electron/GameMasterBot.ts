@@ -59,6 +59,13 @@ export class GameMasterBot {
       });
   }
 
+  setStatusWithoutUpdate(memberId: string, isDied: boolean) {
+    this.members = this.members.map(member => ({
+      ...member,
+      isDied: member.id == memberId ? isDied : member.isDied
+    }));
+  }
+
   makePlayMode() {
     const nextMemberStatus = this.members
       .sort(diedCompareFunction('diedLast'))

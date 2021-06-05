@@ -5,12 +5,14 @@ const MemberInfoContainer = styled.div`
   display: flex;
   align-items: center;
 
+  font-weight: bold;
   font-size: 16px;
   line-height: 19px;
+  letter-spacing: 0.05em;
   color: var(--blue);
 
   > img {
-    width: 32px;
+    width: 24px;
     height: auto;
     line-height: 1;
     border-radius: 16px;

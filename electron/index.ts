@@ -10,7 +10,7 @@ const store = new ElectronStore();
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 375,
+    width: 500,
     height: 600,
     webPreferences: {
       nodeIntegration: true,
@@ -147,4 +147,9 @@ ipcMain.handle('SET_DIED', (e, arg: { memberId: string, isDied: boolean }) => {
   return bot?.setDied(arg.memberId, arg.isDied).then(() => {
     return bot?.gameInfo;
   });
+});
+
+ipcMain.handle('SET_DIED_WITHOUT_UPDATE', (e, arg: { memberId: string, isDied: boolean }) => {
+  bot?.setStatusWithoutUpdate(arg.memberId, arg.isDied);
+  return bot?.gameInfo;
 });

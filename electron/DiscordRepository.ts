@@ -66,7 +66,6 @@ export class DiscordRepository {
     }).then(r => {
       if (!app.isPackaged) {
         console.log(r.headers);
-        r.json().then().then(r => console.log(r)).catch(e => console.error(e));
       }
       if (r.status === 429) {
         const resetAfter = Number(r.headers.get('x-ratelimit-reset-after')) * 1000.0;
