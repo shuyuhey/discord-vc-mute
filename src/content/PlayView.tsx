@@ -3,7 +3,9 @@ import styled from "@emotion/styled";
 import { MemberInfoOnGame } from "../components/MemberInfoOnGame";
 import { PrimaryButton } from "../components/Button";
 
-const Container = styled.div``;
+const Container = styled.div`
+  width: 100%
+`;
 
 const MembersContainer = styled.div`
   box-sizing: border-box;
@@ -12,6 +14,7 @@ const MembersContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  gap: 16px;
 `;
 
 const ButtonContainer = styled.div`

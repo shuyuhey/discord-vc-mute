@@ -39,6 +39,8 @@ const StyledForm = styled(Form)`
   flex-direction: column;
   align-items: stretch;
   gap: 24px;
+  overflow: auto;
+  max-height: 100%;
 
   min-width: 320px;
   padding: 32px 24px;

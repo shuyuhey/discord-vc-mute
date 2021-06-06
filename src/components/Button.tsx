@@ -63,3 +63,21 @@ export const SecondaryButton = styled.button`
     background: var(--gray-2);
   }
 `;
+
+export const TextButton = styled.button`
+  background: inherit;
+  padding: 0;
+  
+  width: fit-content;
+  border: none;
+  appearance: none;
+  outline: none;
+  box-sizing: border-box;
+  color: var(--blue);
+
+  font-size: 14px;
+  line-height: 160%;
+  letter-spacing: 0.03em;
+  
+  cursor: pointer;
+`;

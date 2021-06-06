@@ -1,6 +1,10 @@
 import styled from "@emotion/styled";
 
 export const Title = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
   font-weight: bold;
   font-size: 18px;
   line-height: 160%;

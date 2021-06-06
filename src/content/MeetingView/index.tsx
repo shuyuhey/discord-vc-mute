@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
-import { SecondaryButton } from "../../components/Button";
+import { SecondaryButton, TextButton } from "../../components/Button";
 import { SelectDiedCrewPopup } from "./SelectDiedCrewPopup";
 import { Form, Formik } from "formik";
 import { CrewSelect } from "./ClewSelect";
@@ -40,7 +40,13 @@ export const MeetingView: React.FC<Props> = props => {
   return (
     <Container>
 
-      <Title>追放する人を選んでください</Title>
+      <Title>
+        追放する人を選んでください
+        <TextButton onClick={() => {
+          setIsOpenPopup(true);
+        }}>キルされた人を選び直す</TextButton>
+      </Title>
+
 
       <Formik<{
         members: {

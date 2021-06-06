@@ -46,13 +46,28 @@ const ItemContainer = styled.label<{ checked: boolean; disabled: boolean }>`
     background: var(--hover);
   }
   
+  > span {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  
   ${props => props.disabled ? 'opacity: 0.3' : '' };
+  
+  user-select: none;
+`;
+
+const ImageWrapper = styled.div`
+  overflow: hidden;
+  background: var(--gray-3);
+  border-radius: 16px;
+  width: 24px;
+  height: 24px;
 
   > img {
     width: 24px;
     height: auto;
     line-height: 1;
-    border-radius: 16px;
+    object-fit: cover;
   }
 `;
 
@@ -79,9 +94,10 @@ export const CrewSelect: React.FC<Props> = props => {
               <ItemContainer
                 checked={field.value}
                 disabled={(member.isDied && !!props.shouldDiedMemberIsDisabled)}>
-                <img src={member.icon} alt={`${member.name}のアイコン`}
-                     onError={(e) => e.currentTarget.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='} />
-                <span>@{member.name}</span>
+                <ImageWrapper>
+                <img src={member.icon} />
+                </ImageWrapper>
+                <span>{member.name}</span>
 
                 <input type="checkbox"
                        {...field}

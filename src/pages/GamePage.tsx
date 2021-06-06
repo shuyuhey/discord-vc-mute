@@ -7,6 +7,8 @@ import { BackButtonWithIcon } from "../components/BackButtonWithIcon";
 import { MemberInfo } from "../components/MemberInfo";
 import { PlayView } from "../content/PlayView";
 import { MeetingView } from "../content/MeetingView";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { ClassNames, css } from "@emotion/react";
 
 const MemberContainer = styled.div`
   padding: 16px;
@@ -40,6 +42,37 @@ const ContentLabel = styled.div`
 
 const ContentContainer = styled.div`
   position: relative;
+  padding-bottom: 87px;
+`;
+
+const StandByMemberContainerStyle = css`
+  > * + * {
+    margin-top: 12px;
+  }
+`;
+
+const StandByMemberStyle = css`
+  &-enter {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  &-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: all 200ms ease-out;
+  }
+
+  &-exit {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  &-exit-active {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 200ms ease-out;
+  }
 `;
 
 export const GamePage: React.FC<{}> = () => {
@@ -144,7 +177,7 @@ export const GamePage: React.FC<{}> = () => {
                 members={gameInfo?.members ?? []}
                 onClickStartMeeting={handleMeetingControl}
               />
-            )};
+            )}
           </ContentContainer>
         </>
       ) : (
@@ -153,13 +186,24 @@ export const GamePage: React.FC<{}> = () => {
             <BackButtonWithIcon onClick={backToSetting}>設定に戻る</BackButtonWithIcon>
           </Header>
           <MemberContainer>
-            <ContentLabel>参加メンバー</ContentLabel>
-            {gameInfo?.members.map(member => (
-              <MemberInfo
-                key={member.id}
-                name={member.name}
-                icon={member.icon} />
-            ))}
+            <ContentLabel>参加メンバー（{gameInfo?.members.length ?? 0}）</ContentLabel>
+            <ClassNames>
+              {({ css }) => (
+                <TransitionGroup className={css(StandByMemberContainerStyle)}>
+                  {gameInfo?.members.map(member => (
+                    <CSSTransition
+                      key={member.id}
+                      timeout={200}
+                      classNames={css(StandByMemberStyle)}
+                    >
+                      <MemberInfo
+                        name={member.name}
+                        icon={member.icon} />
+                    </CSSTransition>
+                  ))}
+                </TransitionGroup>
+              )}
+            </ClassNames>
           </MemberContainer>
 
           <ButtonContainer>

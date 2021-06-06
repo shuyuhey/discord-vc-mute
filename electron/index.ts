@@ -12,8 +12,8 @@ const store = new ElectronStore();
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 500,
-    height: 650,
+    width: 600,
+    height: 700,
     webPreferences: {
       nodeIntegration: true,
       devTools: true
@@ -54,7 +54,6 @@ function createWindow() {
     } else {
       win.webContents.send('UPDATE_MODE', 'TOKEN');
     }
-
   });
 }
 

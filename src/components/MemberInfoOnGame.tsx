@@ -64,7 +64,7 @@ export const MemberInfoOnGame: React.FC<Props> = props => {
     >
       <MemberInfo name={props.name} icon={props.icon} />
 
-      {isDied && (<DiedCaption>やられた！</DiedCaption>)}
+      {isDied && (<DiedCaption>やられた</DiedCaption>)}
     </MemberOnGame>
   );
 };
