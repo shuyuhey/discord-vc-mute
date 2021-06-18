@@ -1,5 +1,5 @@
 import { Snowflake } from 'discord.js';
-import { DiscordRepositoryInterface } from "./DiscordRepository";
+import { DiscordRepositoryInterface } from "./DiscordRepository/DiscordRepository";
 import { diedCompareFunction } from "./lib/diedCompareFunction";
 import { discussionModeMuteState, playModeMuteState, standByMuteState } from "./lib/calcMuteState";
 

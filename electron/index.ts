@@ -1,10 +1,18 @@
 import * as electron from 'electron';
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { DiscordRepository, DiscordRepositoryInterface } from "./DiscordRepository";
+import { DiscordRepository, DiscordRepositoryInterface } from "./DiscordRepository/DiscordRepository";
 import { GameMasterBot } from "./GameMasterBot";
 import * as path from "path";
 import ElectronStore from "electron-store";
 import { MockedDiscordRepository } from "./DiscordRepository/MockedDiscordRepository";
+
+if (!app.isPackaged) {
+  require('electron-reload')(__dirname, {
+    electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
+    forceHardReset: true,
+    hardResetMethod: 'exit'
+  });
+}
 
 let bot: GameMasterBot | null = null;
 let repository: DiscordRepositoryInterface;
@@ -20,41 +28,29 @@ function createWindow() {
     }
   })
 
+  win.on('ready-to-show', () => {
+    if (process.env.MOCK_MODE) {
+      repository = new MockedDiscordRepository();
+      win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
+      return;
+    }
+
+    const token = store.get('token');
+    if (token) {
+      repository = new DiscordRepository(String(token), () => {
+        win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
+      });
+    } else {
+      win.webContents.send('UPDATE_MODE', 'TOKEN');
+    }
+  });
+
   if (!app.isPackaged) {
     win.loadURL('http://0.0.0.0:3035/');
     win.webContents?.openDevTools();
   } else {
     win.loadFile(`${__dirname}/../index.html`);
   }
-
-  win.on('ready-to-show', () => {
-    if (!app.isPackaged) {
-      require('electron-reload')(__dirname, {
-        electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
-        forceHardReset: true,
-        hardResetMethod: 'exit'
-      });
-
-      if (process.env.MOCK_MODE) {
-        repository = new MockedDiscordRepository();
-        win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
-        return;
-      }
-    }
-
-    const token = store.get('token');
-    if (token) {
-      DiscordRepository.setupWithToken(String(token)).then(r => {
-        repository = r
-        win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
-      })
-        .catch((error) => {
-          win.webContents.send('UPDATE_MODE', 'TOKEN');
-        });
-    } else {
-      win.webContents.send('UPDATE_MODE', 'TOKEN');
-    }
-  });
 }
 
 app.whenReady().then(createWindow);
@@ -75,9 +71,10 @@ ipcMain.handle('FETCH_BOT_TOKEN', async (e, arg) => {
   return store.get('token');
 });
 
-ipcMain.handle('SET_BOT_TOKEN', async (e, arg: { token: string }) => {
+ipcMain.handle('SET_BOT_TOKEN', (e, arg: { token: string }) => {
   store.set('token', arg.token);
-  return DiscordRepository.setupWithToken(arg.token).then(() => {
+
+  repository = new DiscordRepository(String(arg.token), () => {
     e.sender.send('UPDATE_MODE', 'SETTING');
   });
 });

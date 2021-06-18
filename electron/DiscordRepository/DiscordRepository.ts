@@ -1,4 +1,4 @@
-import * as Discord from 'discord.js';
+import Discord from 'discord.js';
 import fetch from 'node-fetch';
 import { app } from 'electron';
 
@@ -12,20 +12,20 @@ export interface DiscordRepositoryInterface {
   setMemberStatuses(guildId: string, nextMemberStatus: MuteState[]): Promise<void>;
 }
 
+console.log('loading classes');
+
 export class DiscordRepository implements DiscordRepositoryInterface {
-
-  static async setupWithToken(token: string) {
-    const client = new Discord.Client()
-    await client.login(token);
-    return new DiscordRepository(client, token);
-  }
-
-  private client: Discord.Client;
+  private readonly client: Discord.Client;
   private readonly token: string;
 
-  constructor(client: Discord.Client, token: string) {
-    this.client = client;
+  constructor(token: string, onReady: Function) {
     this.token = token;
+    this.client = new Discord.Client();
+
+    this.client.on('[debug]', console.log);
+    this.client.login(token).then(() => {
+      onReady();
+    });
   }
 
   fetchGuilds(): Promise<Guild[]> {

@@ -1,4 +1,4 @@
-import { DiscordRepositoryInterface } from "./index";
+import { DiscordRepositoryInterface } from "./DiscordRepository";
 
 export class MockedDiscordRepository implements DiscordRepositoryInterface {
 
