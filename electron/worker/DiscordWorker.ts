@@ -1,5 +1,6 @@
 import Discord, { Snowflake } from 'discord.js';
 import { app } from 'electron';
+import { diffMuteState } from "../lib/diffMuteState";
 
 export interface DiscordWorkerInterface {
   fetchGuilds(): Guild[];
@@ -90,7 +91,15 @@ export class DiscordWorker implements DiscordWorkerInterface {
   }
 
   async setAllMemberStatus(nextMemberStatus: MuteState[]): Promise<void> {
-    await Promise.all(nextMemberStatus.map((state) => {
+    const currentStatus = this.playChannel?.members.array().map(m => ({
+      memberId: m.id,
+      deaf: m.voice.serverDeaf ?? false,
+      mute: m.voice.serverMute ?? false
+    })) ?? [];
+
+    const statuses = diffMuteState(currentStatus, nextMemberStatus);
+
+    await Promise.all(statuses.map((state) => {
       return this.setMemberStatus(state);
     }));
 
