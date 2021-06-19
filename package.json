@@ -6,7 +6,7 @@
   "homepage": "https://github.com/shuyuhey/discord-vc-mute",
   "repository": "https://github.com/shuyuhey/discord-vc-mute",
   "main": "build/electron/index.js",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "build": {
     "appId": "me.shuyuhey.app.discord-vc-mute",
     "files": [
@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "discord.js": "^12.5.1",
-    "electron-reload": "^1.5.0",
     "electron-store": "^7.0.1"
   },
   "devDependencies": {
@@ -46,6 +45,7 @@
     "concurrently": "^5.3.0",
     "electron": "^11.0.3",
     "electron-builder": "^22.9.1",
+    "electron-reload": "^1.5.0",
     "formik": "^2.2.6",
     "html-webpack-plugin": "^5.1.0",
     "jest": "^26.6.3",
