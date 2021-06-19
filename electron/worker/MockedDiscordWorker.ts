@@ -1,6 +1,7 @@
-import { DiscordRepositoryInterface } from "./DiscordRepository";
+import { DiscordWorkerInterface } from "./DiscordWorker";
+import { Snowflake } from "discord.js";
 
-export class MockedDiscordRepository implements DiscordRepositoryInterface {
+export class MockedDiscordWorker implements DiscordWorkerInterface {
 
   private members: Member[];
 
@@ -8,31 +9,31 @@ export class MockedDiscordRepository implements DiscordRepositoryInterface {
     this.members = [];
   }
 
-  fetchChannelMembers(guildId: string, channelId: string): Promise<Member[]> {
+  fetchChannelMembers(): Member[] {
     if (this.members.length < 10) {
       const member = this.genMember();
       this.members = [...this.members, member];
     }
-    return Promise.resolve(this.members);
+    return this.members;
   }
 
-  fetchGuilds(): Promise<Guild[]> {
-    return Promise.resolve([{ id: '1', name: 'テストサーバー' }]);
+  fetchGuilds(): Guild[] {
+    return [{ id: '1', name: 'テストサーバー' }];
   }
 
-  fetchVoiceChannels(guildId: string): Promise<Channel[]> {
-    return Promise.resolve([
+  fetchVoiceChannels(): Channel[] {
+    return [
       { id: '1', name: 'ボイスチャンネル1'},
       { id: '2', name: 'ボイスチャンネル2'},
       { id: '3', name: 'ボイスチャンネル3'}
-    ]);
+    ];
   }
 
-  setMemberStatus(guildId: string, state: MuteState): Promise<void> {
+  setMemberStatus(state: MuteState): Promise<void> {
     return Promise.resolve(undefined);
   }
 
-  setMemberStatuses(guildId: string, nextMemberStatus: MuteState[]): Promise<void> {
+  setAllMemberStatus(nextMemberStatus: MuteState[]): Promise<void> {
     return Promise.resolve(undefined);
   }
 
@@ -43,5 +44,13 @@ export class MockedDiscordRepository implements DiscordRepositoryInterface {
     const memberLastId = this.members.reverse()[0].id;
     const newId = parseInt(memberLastId) + 1;
     return { id: String(newId), name: 'メンバー' + newId, icon: '' }
+  }
+
+  selectChannel(channelId: Snowflake): Promise<void> {
+    return Promise.resolve(undefined);
+  }
+
+  selectGuild(guildId: Snowflake): Promise<void> {
+    return Promise.resolve(undefined);
   }
 }
