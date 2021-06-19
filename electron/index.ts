@@ -56,10 +56,12 @@ function createWindow() {
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  app.quit();
 })
+
+app.on('will-quit', () => {
+  worker?.terminate();
+});
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
@@ -74,6 +76,7 @@ ipcMain.handle('FETCH_BOT_TOKEN', (e, arg) => {
 ipcMain.handle('SET_BOT_TOKEN', (e, arg: { token: string }) => {
   store.set('token', arg.token);
 
+  worker?.terminate();
   worker = new DiscordWorker(String(arg.token), () => {
     e.sender.send('UPDATE_MODE', 'SETTING');
   });

@@ -15,6 +15,8 @@ export interface DiscordWorkerInterface {
   setMemberStatus(state: MuteState): Promise<void>;
 
   setAllMemberStatus(nextMemberStatus: MuteState[]): Promise<void>;
+
+  terminate(): void;
 }
 
 export class DiscordWorker implements DiscordWorkerInterface {
@@ -47,6 +49,8 @@ export class DiscordWorker implements DiscordWorkerInterface {
 
   async selectGuild(guildId: Snowflake) {
     this.guild = await this.client.guilds.fetch(guildId);
+    this.playChannel = undefined;
+    this.players = [];
   }
 
   fetchVoiceChannels(): Channel[] {
@@ -63,6 +67,7 @@ export class DiscordWorker implements DiscordWorkerInterface {
       return;
     }
 
+    this.players = [];
     this.playChannel = await this.guild?.channels.cache.find(channel => channel.id === channelId);
   }
 
@@ -79,7 +84,8 @@ export class DiscordWorker implements DiscordWorkerInterface {
   }
 
   async setMemberStatus(state: MuteState): Promise<void> {
-    await this.players.map(p => p.edit({ deaf: state.deaf, mute: state.mute }));
+    const player = this.players.find(p => p.id === state.memberId);
+    await player?.edit({ deaf: state.deaf, mute: state.mute });
     return;
   }
 
@@ -89,5 +95,10 @@ export class DiscordWorker implements DiscordWorkerInterface {
     }));
 
     return;
+  }
+
+  terminate() {
+    this.client.removeAllListeners();
+    this.client.destroy();
   }
 }

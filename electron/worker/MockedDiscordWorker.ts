@@ -53,4 +53,7 @@ export class MockedDiscordWorker implements DiscordWorkerInterface {
   selectGuild(guildId: Snowflake): Promise<void> {
     return Promise.resolve(undefined);
   }
+
+  terminate(): void {
+  }
 }
