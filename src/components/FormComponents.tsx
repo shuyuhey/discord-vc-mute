@@ -23,8 +23,9 @@ export const FieldContainer = styled.div`
 export const FieldLabel = styled.div`
   font-weight: 500;
   font-size: 0.9rem;
+  letter-spacing: 0.03em;
 
-  color: var(--gray-9);
+  color: var(--gray-12);
 `;
 
 export const ErrorLabel = styled.div`

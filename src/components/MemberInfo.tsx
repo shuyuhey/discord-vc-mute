@@ -5,26 +5,47 @@ const MemberInfoContainer = styled.div`
   display: flex;
   align-items: center;
 
+  font-weight: bold;
   font-size: 16px;
   line-height: 19px;
+  letter-spacing: 0.05em;
   color: var(--blue);
-
-  > img {
-    width: 32px;
-    height: auto;
-    line-height: 1;
-    border-radius: 16px;
-  }
-
+  overflow: hidden;
+  
   > * + * {
     margin-left: 8px;
   }
 `;
 
+const ImageWrapper = styled.div`
+  overflow: hidden;
+  background: var(--gray-3);
+  border-radius: 16px;
+  width: 24px;
+  height: 24px;
+
+  > img {
+    width: 24px;
+    height: auto;
+    line-height: 1;
+    object-fit: cover;
+  }
+`;
+
+const NameWrapper = styled.div`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: keep-all;
+  white-space: nowrap;
+`;
+
 export const MemberInfo: React.FC<{ name: string; icon: string; }> = (props) => (
   <MemberInfoContainer>
-    <img src={props.icon} alt={`${props.name}のアイコン`}
-         onError={(e) => e.currentTarget.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='} />
-    <span>@{props.name}</span>
+    <ImageWrapper>
+      <img src={props.icon} alt={``} />
+    </ImageWrapper>
+    <NameWrapper>
+      <span>@{props.name}</span>
+    </NameWrapper>
   </MemberInfoContainer>
 );

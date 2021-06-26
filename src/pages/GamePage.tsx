@@ -1,11 +1,14 @@
 import React from "react";
 import styled from "@emotion/styled";
-import { PrimaryButton, SecondaryButton } from "../components/Button";
+import { SecondaryButton } from "../components/Button";
 import { invoke } from "../lib/subscribe";
 import { Header } from "../components/Header";
 import { BackButtonWithIcon } from "../components/BackButtonWithIcon";
-import { MemberInfoOnGame } from "../components/MemberInfoOnGame";
 import { MemberInfo } from "../components/MemberInfo";
+import { PlayView } from "../content/PlayView";
+import { MeetingView } from "../content/MeetingView";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { ClassNames, css } from "@emotion/react";
 
 const MemberContainer = styled.div`
   padding: 16px;
@@ -29,11 +32,47 @@ const ButtonContainer = styled.div`
 `;
 
 const ContentLabel = styled.div`
-  color: var(--gray-9);
+  color: var(--gray-12);
 
   font-weight: bold;
   font-size: 16px;
   line-height: 19px;
+  letter-spacing: 0.03em;
+`;
+
+const ContentContainer = styled.div`
+  position: relative;
+  padding-bottom: 87px;
+`;
+
+const StandByMemberContainerStyle = css`
+  > * + * {
+    margin-top: 12px;
+  }
+`;
+
+const StandByMemberStyle = css`
+  &-enter {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  &-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: all 200ms ease-out;
+  }
+
+  &-exit {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  &-exit-active {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 200ms ease-out;
+  }
 `;
 
 export const GamePage: React.FC<{}> = () => {
@@ -79,6 +118,16 @@ export const GamePage: React.FC<{}> = () => {
       });
   }, [setGameInfo, setIsLoading]);
 
+  const setDiedWithoutUpdate = React.useCallback((memberId: string, isDied: boolean) => {
+    setIsLoading(true);
+
+    return invoke('SET_DIED_WITHOUT_UPDATE', { memberId, isDied })
+      .then((info) => {
+        setIsLoading(false);
+        setGameInfo(info);
+      });
+  }, [setGameInfo, setIsLoading]);
+
   const handlePlayControl = React.useCallback(() => {
     if (gameInfo?.isStarted) {
       return invoke('FINISH_PLAY')
@@ -89,6 +138,15 @@ export const GamePage: React.FC<{}> = () => {
     }
   }, [gameInfo, setGameInfo]);
 
+  const handleStartMeeting = React.useCallback(() => {
+    setIsLoading(true);
+
+    return invoke('START_MEETING').then(info => {
+      setIsLoading(false);
+      setGameInfo(info);
+    });
+  }, []);
+
   const handleMeetingControl = React.useCallback(() => {
     setIsLoading(true);
     if (gameInfo?.inMeeting) {
@@ -98,7 +156,7 @@ export const GamePage: React.FC<{}> = () => {
           setGameInfo(info);
         });
     } else {
-      return invoke('START_MEETING')
+      return invoke('TURN_TO_MEETING_MODE')
         .then((info) => {
           setIsLoading(false);
           setGameInfo(info);
@@ -114,31 +172,23 @@ export const GamePage: React.FC<{}> = () => {
             <BackButtonWithIcon onClick={handlePlayControl}>ゲーム終了</BackButtonWithIcon>
           </Header>
 
-          <MemberContainer>
-            {gameInfo?.members.map(member => (
-              <MemberInfoOnGame
-                {...member}
-                key={member.id}
-                setDied={setDied}
-              />
-            ))}
-          </MemberContainer>
-
-          <ButtonContainer>
+          <ContentContainer>
             {gameInfo?.inMeeting ? (
-              <SecondaryButton
-                disabled={isLoading}
-                onClick={handleMeetingControl}>
-                会議終了
-              </SecondaryButton>
+              <MeetingView
+                setDied={setDied}
+                startMeeting={handleStartMeeting}
+                setDiedWithoutUpdate={setDiedWithoutUpdate}
+                members={gameInfo?.members ?? []}
+                onClickFinishMeeting={handleMeetingControl}
+              />
             ) : (
-              <PrimaryButton
-                disabled={isLoading}
-                onClick={handleMeetingControl}>
-                会議開始
-              </PrimaryButton>
+              <PlayView
+                setDied={setDied}
+                members={gameInfo?.members ?? []}
+                onClickStartMeeting={handleMeetingControl}
+              />
             )}
-          </ButtonContainer>
+          </ContentContainer>
         </>
       ) : (
         <>
@@ -146,13 +196,24 @@ export const GamePage: React.FC<{}> = () => {
             <BackButtonWithIcon onClick={backToSetting}>設定に戻る</BackButtonWithIcon>
           </Header>
           <MemberContainer>
-            <ContentLabel>参加メンバー</ContentLabel>
-            {gameInfo?.members.map(member => (
-              <MemberInfo
-                key={member.id}
-                name={member.name}
-                icon={member.icon} />
-            ))}
+            <ContentLabel>参加メンバー（{gameInfo?.members.length ?? 0}）</ContentLabel>
+            <ClassNames>
+              {({ css }) => (
+                <TransitionGroup className={css(StandByMemberContainerStyle)}>
+                  {gameInfo?.members.map(member => (
+                    <CSSTransition
+                      key={member.id}
+                      timeout={200}
+                      classNames={css(StandByMemberStyle)}
+                    >
+                      <MemberInfo
+                        name={member.name}
+                        icon={member.icon} />
+                    </CSSTransition>
+                  ))}
+                </TransitionGroup>
+              )}
+            </ClassNames>
           </MemberContainer>
 
           <ButtonContainer>

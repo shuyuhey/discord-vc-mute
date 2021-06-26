@@ -1,22 +1,49 @@
 import * as electron from 'electron';
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { DiscordRepository } from "./DiscordRepository";
-import { GameMasterBot } from "./GameMasterBot";
+import { DiscordWorker, DiscordWorkerInterface } from "./worker/DiscordWorker";
+import { GameState } from "./GameState";
 import * as path from "path";
 import ElectronStore from "electron-store";
+import { MockedDiscordWorker } from "./worker/MockedDiscordWorker";
 
-let bot: GameMasterBot | null = null;
+if (!app.isPackaged) {
+  require('electron-reload')(__dirname, {
+    electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
+    forceHardReset: true,
+    hardResetMethod: 'exit'
+  });
+}
+
+let state: GameState | null = null;
+let worker: DiscordWorkerInterface;
 const store = new ElectronStore();
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 375,
-    height: 600,
+    width: 600,
+    height: 700,
     webPreferences: {
       nodeIntegration: true,
       devTools: true
     }
   })
+
+  win.on('ready-to-show', () => {
+    if (process.env.MOCK_MODE) {
+      worker = new MockedDiscordWorker();
+      win.webContents.send('UPDATE_MODE', state ? 'GAME' : 'SETTING');
+      return;
+    }
+
+    const token = store.get('token');
+    if (token) {
+      worker = new DiscordWorker(String(token), () => {
+        win.webContents.send('UPDATE_MODE', state ? 'GAME' : 'SETTING');
+      });
+    } else {
+      win.webContents.send('UPDATE_MODE', 'TOKEN');
+    }
+  });
 
   if (!app.isPackaged) {
     win.loadURL('http://0.0.0.0:3035/');
@@ -24,37 +51,17 @@ function createWindow() {
   } else {
     win.loadFile(`${__dirname}/../index.html`);
   }
-
-  win.on('ready-to-show', () => {
-    const token = store.get('token');
-    if (token) {
-      DiscordRepository.setupWithToken(String(token)).then(() => {
-        win.webContents.send('UPDATE_MODE', bot ? 'GAME' : 'SETTING');
-      })
-        .catch((error) => {
-          win.webContents.send('UPDATE_MODE', 'TOKEN');
-        });
-    } else {
-      win.webContents.send('UPDATE_MODE', 'TOKEN');
-    }
-  });
-
-  if (!app.isPackaged) {
-    require('electron-reload')(__dirname, {
-      electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
-      forceHardReset: true,
-      hardResetMethod: 'exit'
-    });
-  }
 }
 
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  app.quit();
 })
+
+app.on('will-quit', () => {
+  worker?.terminate();
+});
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
@@ -62,13 +69,15 @@ app.on('activate', () => {
   }
 });
 
-ipcMain.handle('FETCH_BOT_TOKEN', async (e, arg) => {
+ipcMain.handle('FETCH_BOT_TOKEN', (e, arg) => {
   return store.get('token');
 });
 
-ipcMain.handle('SET_BOT_TOKEN', async (e, arg: { token: string }) => {
+ipcMain.handle('SET_BOT_TOKEN', (e, arg: { token: string }) => {
   store.set('token', arg.token);
-  return DiscordRepository.setupWithToken(arg.token).then(() => {
+
+  worker?.terminate();
+  worker = new DiscordWorker(String(arg.token), () => {
     e.sender.send('UPDATE_MODE', 'SETTING');
   });
 });
@@ -79,72 +88,96 @@ ipcMain.handle('RESET_TOKEN', (e) => {
 });
 
 ipcMain.handle('RESET_SETTING', (e) => {
-  bot = null;
+  state = null;
   e.sender.send('UPDATE_MODE', 'SETTING');
   return;
 });
 
-ipcMain.handle('REQUEST_FETCH_GUILD', async (e, arg) => {
-  return await DiscordRepository.shared.fetchGuilds()
-    .then((guilds) => {
-      return guilds;
-    });
+ipcMain.handle('REQUEST_FETCH_GUILD', (e, arg) => {
+  return worker.fetchGuilds();
 })
 
 ipcMain.handle('REQUEST_FETCH_CHANNELS', async (e, arg: { guildId: string }) => {
-  return await DiscordRepository.shared.fetchVoiceChannels(arg.guildId)
-    .then((channels) => {
-      return channels;
-    });
+  await worker.selectGuild(arg.guildId);
+  return worker.fetchVoiceChannels();
 })
 
-ipcMain.handle('COMPLETE_STANDBY', async (e, arg: { guildId: string, channelId: string }) => {
-  const repository = DiscordRepository.shared;
+ipcMain.handle('COMPLETE_STANDBY', async (e, arg: { channelId: string }) => {
+  await worker.selectChannel(arg.channelId)
 
-  bot = new GameMasterBot(arg.guildId,
-    arg.channelId,
-    repository);
+  state = new GameState();
   e.sender.send('START_GAME');
   return;
 });
 
 ipcMain.handle('REQUEST_FETCH_GAME', (e, arg) => {
-  e.sender.send('UPDATE_GAME', bot?.gameInfo);
-  return bot?.gameInfo;
+  e.sender.send('UPDATE_GAME', state?.gameInfo);
+  return state?.gameInfo;
 });
 
 ipcMain.handle('REQUEST_SYNC_MEMBER', (e) => {
-  bot?.syncCurrentChannelMembers();
-  e.sender.send('UPDATE_GAME', bot?.gameInfo);
-  return bot?.gameInfo;
+  const members = worker.fetchChannelMembers();
+  state?.syncCurrentChannelMembers(members);
+  e.sender.send('UPDATE_GAME', state?.gameInfo);
+  return state?.gameInfo;
 });
 
 ipcMain.handle('START_PLAY', (e) => {
-  return bot?.startPlay().then(() => {
-    return bot?.gameInfo;
-  });
+  if (!state) {
+    return;
+  }
+  state.startPlay();
+  worker?.setAllMemberStatus(state.currentMuteStatus)
+  return state.gameInfo;
 });
 
 ipcMain.handle('FINISH_PLAY', (e) => {
-  return bot?.finishPlay().then(() => {
-    return bot?.gameInfo;
-  });
+  if (!state) {
+    return;
+  }
+  state?.finishPlay();
+  worker?.setAllMemberStatus(state.currentMuteStatus)
+  return state?.gameInfo;
+});
+
+ipcMain.handle('TURN_TO_MEETING_MODE', (e) => {
+  if (!state) {
+    return;
+  }
+  state?.makeDiscussionMode();
+  return state?.gameInfo;
 });
 
 ipcMain.handle('START_MEETING', (e) => {
-  return bot?.makeDiscussionMode().then(() => {
-    return bot?.gameInfo;
-  });
+  if (!state) {
+    return;
+  }
+  state?.makeDiscussionMode();
+  worker?.setAllMemberStatus(state.currentMuteStatus)
+  return state?.gameInfo;
 });
 
 ipcMain.handle('FINISH_MEETING', (e) => {
-  return bot?.makePlayMode().then(() => {
-    return bot?.gameInfo;
-  });
+  if (!state) {
+    return;
+  }
+  state?.makePlayMode();
+  worker?.setAllMemberStatus(state.currentMuteStatus)
+  return state?.gameInfo;
 });
 
 ipcMain.handle('SET_DIED', (e, arg: { memberId: string, isDied: boolean }) => {
-  return bot?.setDied(arg.memberId, arg.isDied).then(() => {
-    return bot?.gameInfo;
-  });
+  if (!state) {
+    return;
+  }
+  const member = state?.setDied(arg.memberId, arg.isDied);
+  if (member) {
+    worker?.setMemberStatus(member);
+  }
+  return state.gameInfo;
+});
+
+ipcMain.handle('SET_DIED_WITHOUT_UPDATE', (e, arg: { memberId: string, isDied: boolean }) => {
+  state?.setDied(arg.memberId, arg.isDied);
+  return state?.gameInfo;
 });
