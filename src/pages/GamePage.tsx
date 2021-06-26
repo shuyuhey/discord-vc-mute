@@ -138,6 +138,15 @@ export const GamePage: React.FC<{}> = () => {
     }
   }, [gameInfo, setGameInfo]);
 
+  const handleStartMeeting = React.useCallback(() => {
+    setIsLoading(true);
+
+    return invoke('START_MEETING').then(info => {
+      setIsLoading(false);
+      setGameInfo(info);
+    });
+  }, []);
+
   const handleMeetingControl = React.useCallback(() => {
     setIsLoading(true);
     if (gameInfo?.inMeeting) {
@@ -147,7 +156,7 @@ export const GamePage: React.FC<{}> = () => {
           setGameInfo(info);
         });
     } else {
-      return invoke('START_MEETING')
+      return invoke('TURN_TO_MEETING_MODE')
         .then((info) => {
           setIsLoading(false);
           setGameInfo(info);
@@ -167,6 +176,7 @@ export const GamePage: React.FC<{}> = () => {
             {gameInfo?.inMeeting ? (
               <MeetingView
                 setDied={setDied}
+                startMeeting={handleStartMeeting}
                 setDiedWithoutUpdate={setDiedWithoutUpdate}
                 members={gameInfo?.members ?? []}
                 onClickFinishMeeting={handleMeetingControl}

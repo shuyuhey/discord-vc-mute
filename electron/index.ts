@@ -140,6 +140,14 @@ ipcMain.handle('FINISH_PLAY', (e) => {
   return state?.gameInfo;
 });
 
+ipcMain.handle('TURN_TO_MEETING_MODE', (e) => {
+  if (!state) {
+    return;
+  }
+  state?.makeDiscussionMode();
+  return state?.gameInfo;
+});
+
 ipcMain.handle('START_MEETING', (e) => {
   if (!state) {
     return;

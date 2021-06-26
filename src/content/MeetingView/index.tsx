@@ -32,6 +32,7 @@ type Props = {
   setDied: (id: string, isDied: boolean) => Promise<void>;
   setDiedWithoutUpdate: (id: string, isDied: boolean) => Promise<void>;
   onClickFinishMeeting: () => void;
+  startMeeting: () => Promise<void>;
 }
 
 export const MeetingView: React.FC<Props> = props => {
@@ -46,7 +47,6 @@ export const MeetingView: React.FC<Props> = props => {
           setIsOpenPopup(true);
         }}>キルされた人を選び直す</TextButton>
       </Title>
-
 
       <Formik<{
         members: {
@@ -94,10 +94,14 @@ export const MeetingView: React.FC<Props> = props => {
           onUpdateStatus={(values) => {
             return Promise.all(
               values.map(member => {
-                return props.setDied(member.id, member.isDied);
+                return props.setDiedWithoutUpdate(member.id, member.isDied);
               })
-            ).then(() => {
-              setIsOpenPopup(false);
+            )
+              .then(() => {
+                return props.startMeeting();
+              })
+              .then(() => {
+                setIsOpenPopup(false);
             });
           }}
         />
