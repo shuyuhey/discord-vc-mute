@@ -22,6 +22,5 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.d.ts",
-    "../electron/types/*.d.ts"
   ]
 }
