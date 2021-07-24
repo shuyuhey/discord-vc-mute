@@ -145,6 +145,7 @@ ipcMain.handle('TURN_TO_MEETING_MODE', (e) => {
     return;
   }
   state?.makeDiscussionMode();
+  worker?.setAllMemberStatus(state.currentMuteStatus.filter(s => s.mute));
   return state?.gameInfo;
 });
 
